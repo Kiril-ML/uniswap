@@ -1,3 +1,6 @@
+import { TokenInfo } from '@usedapp/core/dist/esm/src/model/TokenInfo';
+import { ethers } from 'ethers';
+
 import { RequestStatus } from 'src/shared/helpers/redux';
 import { Address } from 'src/shared/api/blockchain/types';
 
@@ -19,6 +22,12 @@ type State = {
   error: string | null;
 };
 
+type Item = TokenInfo & {
+  address: string;
+  image: string;
+  balance: ethers.BigNumber | undefined;
+};
+
 type Token = {
   address: Address;
   name: string;
@@ -38,4 +47,4 @@ type Fee = {
   decimals: number;
 };
 
-export type { State, Token, Pair, Fee };
+export type { State, Token, Pair, Fee, Item };

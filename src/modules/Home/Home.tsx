@@ -7,7 +7,7 @@ import { Header } from 'src/modules/shared/components';
 import { DefaultLayout } from 'src/modules/shared/pageTemplates';
 import type { NextPageWithLayout } from 'src/shared/types';
 import { Box, PageHead, Typography } from 'src/shared/components';
-import { SwapForm } from 'src/features/Provider/View/components/SwapForm/SwapForm';
+import { Provider } from 'src/features/Provider';
 
 import { createStyles } from './Home.style';
 
@@ -31,7 +31,7 @@ const Home: NextPageWithLayout = () => {
           {errorMessage !== '' ? (
             <Typography color="error">{errorMessage}</Typography>
           ) : (
-            <SwapForm></SwapForm>
+            <Provider view={'Swap'}></Provider>
           )}
         </Box>
       </DefaultLayout>

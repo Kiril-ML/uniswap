@@ -8,7 +8,12 @@ const createStyles = (theme: Theme) => ({
     display: flex;
   `,
   autocomplete: () => css``,
+  inputAdornment: () =>
+    css`
+      min-width: ${theme.spacing(110)};
+    `,
   input: () => css``,
+
   option: () => css``,
   optionAvatar: () =>
     css`

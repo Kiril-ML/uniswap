@@ -1,7 +1,6 @@
-/* eslint-disable multiline-comment-style */
 import { FC, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useTheme } from '@mui/material';
+import { CircularProgress, useTheme } from '@mui/material';
 import { useEthers, useEtherBalance, Rinkeby } from '@usedapp/core';
 import { formatEther } from '@ethersproject/units';
 
@@ -31,7 +30,8 @@ const Header: FC<Props> = ({ handleError }) => {
   const theme = useTheme();
   const styles = createStyles({}, theme);
 
-  const { activateBrowserWallet, account, deactivate, chainId } = useEthers();
+  const { activateBrowserWallet, account, deactivate, chainId, error } =
+    useEthers();
   const etherBalance = useEtherBalance(account);
 
   const { pathname } = useRouter();
@@ -58,8 +58,12 @@ const Header: FC<Props> = ({ handleError }) => {
       return;
     }
 
+    if (error !== undefined) {
+      handleError(error.message);
+    }
+
     handleError('');
-  }, [chainId, handleError]);
+  }, [chainId, error, handleError]);
 
   const handleAuthClick = () => {
     activateBrowserWallet();
@@ -95,9 +99,13 @@ const Header: FC<Props> = ({ handleError }) => {
               </Typography>
               <Typography>
                 ETH:{' '}
-                {etherBalance
-                  ? Number(formatEther(etherBalance)).toFixed(3)
-                  : 'undefined'}
+                {etherBalance ? (
+                  Number(formatEther(etherBalance)).toFixed(3)
+                ) : (
+                  <CircularProgress
+                    style={{ maxWidth: '20px', maxHeight: '20px' }}
+                  />
+                )}
               </Typography>
               <IconButton onClick={handleLogoutClick}>
                 <Logout></Logout>
