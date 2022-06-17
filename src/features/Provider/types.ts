@@ -1,45 +1,31 @@
-import { TokenInfo } from '@usedapp/core/dist/esm/src/model/TokenInfo';
-import { ethers } from 'ethers';
-
 import { RequestStatus } from 'src/shared/helpers/redux';
-import { Address } from 'src/shared/api/blockchain/types';
 
 type State = {
   status: RequestStatus;
-  calculationStatus: RequestStatus;
+  error: string | null;
   data: {
     tokens: Token[];
     pairs: Pair[];
     fee: Fee;
   };
-  calculation: {
-    action: 'in' | 'out';
-    value: string;
-    fee: string;
-    decimals: number;
-  };
-  shouldUpdateData: boolean;
-  error: string | null;
-};
-
-type Item = TokenInfo & {
-  address: string;
-  image: string;
-  balance: ethers.BigNumber | undefined;
 };
 
 type Token = {
-  address: Address;
   name: string;
   symbol: string;
+  address: string;
+  image: string;
   userBalance: string;
   decimals: number;
-  image: string;
 };
 
-type Pair = Omit<Token, 'name'> & {
+type Pair = {
   tokens: (Token & { pairBalance: string | '' })[];
   proportion: string | 'any';
+  tokenNames: [string, string];
+  address: string;
+  userBalance: string;
+  decimals: number;
 };
 
 type Fee = {
@@ -47,4 +33,4 @@ type Fee = {
   decimals: number;
 };
 
-export type { State, Token, Pair, Fee, Item };
+export type { State, Token, Pair, Fee };

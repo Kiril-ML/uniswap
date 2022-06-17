@@ -45,7 +45,6 @@ const config = {
 
     '@emotion/pkg-renaming': 'error',
     '@emotion/syntax-preference': [2, 'string'],
-    'import/no-extraneous-dependencies': 'off',
   },
   overrides: [
     {
@@ -68,6 +67,10 @@ const config = {
 
         'plugin:prettier/recommended',
       ],
+      rules: {
+        'import/no-extraneous-dependencies': 'off',
+        'multiline-comment-style': 'off',
+      },
     },
     {
       files: ['**/pages/**/*'],
@@ -84,27 +87,22 @@ const config = {
           'error',
           { props: true, ignorePropertyModificationsFor: ['state'] },
         ],
-        'import/no-extraneous-dependencies': ['off'],
+        'import/no-extraneous-dependencies': 'off',
       },
     },
     {
       files: ['**/*.stories.*'],
       rules: {
-        'import/no-extraneous-dependencies': 'off',
         'import/no-default-export': 'off',
       },
     },
     {
       files: ['**/initAxe.ts'],
-      rules: {
-        'import/no-extraneous-dependencies': 'off',
-      },
+      rules: {},
     },
     {
       files: ['**/test-utils.tsx', '**/shared/tests/**/*'],
-      rules: {
-        'import/no-extraneous-dependencies': 'off',
-      },
+      rules: {},
     },
     {
       files: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],

@@ -1,11 +1,10 @@
-/* eslint-disable multiline-comment-style */
-
-import { formatUnits } from '@ethersproject/units';
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useTheme } from '@mui/material';
 import { useEthers } from '@usedapp/core';
 import { FC, ReactElement, SyntheticEvent, useEffect, useState } from 'react';
 
-import { Item } from 'src/features/Provider/types';
+import { useAppDispatch, useAppSelector } from 'src/app/hooks';
+import { Token } from 'src/features/Provider/types';
 import {
   Box,
   Button,
@@ -14,7 +13,14 @@ import {
   InputAdornment,
   ArrowDown,
 } from 'src/shared/components';
+import {
+  BigNumber,
+  formatUnits,
+  parseUnits,
+} from 'src/shared/helpers/blockchain/numbers';
+import { calculateSwapIn } from 'src/features/Provider/utils';
 
+import { selectProvider, swapIn } from '../../../../redux/slice';
 import {
   FieldWithAutocomplete,
   Props as FieldWithAutocompleteProps,
@@ -22,55 +28,51 @@ import {
 import { NumberInput } from '../../../components/NumberInput/NumberInput';
 import { SubmitButtonValue } from '../types';
 import { createStyles } from './SwapForm.style';
+import { initialState, MAX_SLIPPAGE, MIN_SLIPPAGE } from './constants';
+import { changeButtonText } from './utils/changeButtonText';
+import { shortBalance } from './utils/shortBalance';
 
 type HandleAutocompleteChange =
   FieldWithAutocompleteProps['handleAutocompleteChange'];
 
 type Props = {
-  items: Item[];
+  isLoading: boolean;
   hint?: ReactElement;
 };
 
-const SwapForm: FC<Props> = ({ hint, items }) => {
+const SwapForm: FC<Props> = ({ hint, isLoading }) => {
   const theme = useTheme();
   const styles = createStyles(theme);
 
-  const [firstToken, setFirstToken] = useState('');
+  const dispatch = useAppDispatch();
+  const { data } = useAppSelector(selectProvider);
+  const { tokens } = data;
+
+  const [firstToken, setFirstToken] = useState<Token>(initialState.firstToken);
   const [firstTokenValue, setFirstTokenValue] = useState('');
-  const [secondToken, setSecondToken] = useState('');
+  const [secondToken, setSecondToken] = useState<Token>(
+    initialState.secondToken
+  );
   const [secondTokenValue, setSecondTokenValue] = useState('');
-  const [slippage, setSlippage] = useState('');
+  const [slippage, setSlippage] = useState<number | string>(
+    initialState.slippage
+  );
   const [submitButtonText, setSubmitButtonText] =
     useState<SubmitButtonValue>('Подключите кошелек');
 
-  const { account } = useEthers();
-  const isShouldDisabled = account === undefined;
+  const { account, library } = useEthers();
+  const isShouldDisabled = account === undefined || isLoading;
 
   useEffect(() => {
-    if (firstToken === '' || secondToken === '') {
-      setSubmitButtonText('Выберите токены');
-    }
-
-    if (
-      firstToken !== '' &&
-      secondToken !== '' &&
-      (firstTokenValue === '' || secondTokenValue === '')
-    ) {
-      setSubmitButtonText('Укажите количество');
-    }
-
-    if (
-      firstToken !== '' &&
-      secondToken !== '' &&
-      firstTokenValue !== '' &&
-      secondTokenValue !== ''
-    ) {
-      setSubmitButtonText('Обменять');
-    }
-
-    if (isShouldDisabled) {
-      setSubmitButtonText('Подключите кошелек');
-    }
+    setSubmitButtonText(
+      changeButtonText({
+        firstToken,
+        firstTokenValue,
+        isShouldDisabled,
+        secondToken,
+        secondTokenValue,
+      })
+    );
   }, [
     firstToken,
     firstTokenValue,
@@ -84,14 +86,12 @@ const SwapForm: FC<Props> = ({ hint, items }) => {
     value
   ) => {
     if (value === null) {
-      console.log(value);
-
-      setFirstToken('');
+      setFirstToken(initialState.firstToken);
 
       return;
     }
 
-    setFirstToken(value.name);
+    setFirstToken(value);
   };
 
   const handleSecondTokenAutocompleteChange: HandleAutocompleteChange = (
@@ -99,53 +99,130 @@ const SwapForm: FC<Props> = ({ hint, items }) => {
     value
   ) => {
     if (value === null) {
-      setSecondToken('');
+      setSecondToken(initialState.secondToken);
 
       return;
     }
 
-    setSecondToken(value.name);
+    setSecondToken(value);
   };
+
+  let shouldReverse = false;
+  const currentPair = data.pairs.filter((pair) => {
+    const stringPairNames = pair.tokenNames.join('');
+    const stringFormNames = `${firstToken.name}${secondToken.name}`;
+    const reverseStringFormNames = `${secondToken.name}${firstToken.name}`;
+
+    if (stringPairNames === stringFormNames) {
+      shouldReverse = false;
+
+      return true;
+    }
+
+    if (stringPairNames === reverseStringFormNames) {
+      shouldReverse = true;
+
+      return true;
+    }
+
+    shouldReverse = false;
+
+    return false;
+  });
+
+  let signer;
+
+  if (account !== undefined) {
+    signer = library?.getSigner();
+  }
 
   const handleSubmit = (event: SyntheticEvent) => {
     event.preventDefault();
-    // onSubmit(data);
-  };
 
-  const findBalance = (tokenName: string) => {
-    if (tokenName === '') return null;
-    const currentItem = items.filter((item) => item.name === tokenName);
+    dispatch(
+      swapIn({
+        tokenInAddress: firstToken.address,
+        tokenInValue: parseUnits(firstTokenValue, firstToken.decimals),
+        tokenOutAddress: secondToken.address,
+        tokenOutMin: parseUnits(secondTokenValue, secondToken.decimals),
+        provider: library,
+        signer,
+      })
+    );
 
-    if (
-      currentItem.length === 0 ||
-      currentItem[0].balance === undefined ||
-      currentItem[0].decimals === undefined
-    ) {
-      return null;
-    }
-
-    return Number(
-      formatUnits(currentItem[0].balance, currentItem[0].decimals)
-    ).toFixed(4);
+    // console.log(data, 'data');
   };
 
   const handleFirstTokenValueChange = (
     event: SyntheticEvent<HTMLInputElement>
   ) => {
-    setFirstTokenValue(event.currentTarget.value);
+    if (event.currentTarget !== undefined) {
+      setFirstTokenValue(() => {
+        if (firstToken.name !== '' && secondToken.name !== '') {
+          const secondValue =
+            +event.currentTarget.value / +currentPair[0].proportion;
+          setSecondTokenValue(secondValue.toFixed(4));
+        }
+
+        return event.currentTarget.value;
+      });
+    }
   };
 
   const handleSecondTokenValueChange = (
     event: SyntheticEvent<HTMLInputElement>
   ) => {
-    setSecondTokenValue(event.currentTarget.value);
+    if (event.currentTarget !== undefined) {
+      setSecondTokenValue(() => {
+        if (firstToken.name !== '' && secondToken.name !== '') {
+          const secondValue =
+            +event.currentTarget.value / +currentPair[0].proportion;
+          setFirstTokenValue(secondValue.toFixed(4));
+        }
+
+        return event.currentTarget.value;
+      });
+    }
   };
 
   const handleSlippageChange = (
     event: SyntheticEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setSlippage(event.currentTarget.value);
+    const newValue = Number(event.currentTarget.value);
+
+    if (newValue <= MAX_SLIPPAGE && newValue >= MIN_SLIPPAGE) {
+      setSlippage(event.currentTarget.value.slice(0, 5));
+    }
   };
+
+  let maxTokenIn = '0';
+  let tokenOutMaxToSet = '0';
+
+  if (currentPair.length !== 0) {
+    maxTokenIn = BigNumber.min(
+      firstToken.userBalance,
+      currentPair[0].tokens[0].pairBalance
+    ).toString();
+
+    tokenOutMaxToSet = calculateSwapIn({
+      amountIn: parseUnits(maxTokenIn, firstToken.decimals),
+      balanceIn: parseUnits(
+        currentPair[0].tokens[0].pairBalance,
+        firstToken.decimals
+      ),
+      balanceOut: parseUnits(
+        currentPair[0].tokens[1].pairBalance,
+        secondToken.decimals
+      ),
+      fee: {
+        amount: parseUnits(data.fee.value, data.fee.decimals),
+        decimals: data.fee.decimals,
+      },
+      decimals: Math.max(firstToken.decimals, secondToken.decimals),
+    });
+  }
+
+  // console.log(currentPair, 'currentPair', swapOutValue);
 
   return (
     <Card
@@ -162,11 +239,14 @@ const SwapForm: FC<Props> = ({ hint, items }) => {
                 disabled: isShouldDisabled,
                 onChange: handleFirstTokenValueChange,
               }}
-              balance={findBalance(firstToken)}
+              balance={shortBalance(firstToken.userBalance)}
               disabled={isShouldDisabled}
               handleAutocompleteChange={handleFirstTokenAutocompleteChange}
-              options={items.filter((item) => item.name !== secondToken)}
+              options={tokens.filter(
+                (token) => token.name !== secondToken.name
+              )}
               isMaxBtnDisplayed
+              max={maxTokenIn}
             />
             <Box css={styles.arrow()}>
               <ArrowDown></ArrowDown>
@@ -177,10 +257,11 @@ const SwapForm: FC<Props> = ({ hint, items }) => {
                 onChange: handleSecondTokenValueChange,
                 disabled: isShouldDisabled,
               }}
-              balance={findBalance(secondToken)}
-              options={items.filter((item) => item.name !== firstToken)}
+              balance={shortBalance(secondToken.userBalance)}
+              options={tokens.filter((token) => token.name !== firstToken.name)}
               handleAutocompleteChange={handleSecondTokenAutocompleteChange}
               disabled={isShouldDisabled}
+              max={tokenOutMaxToSet}
             />
             {hint}
             <Box>

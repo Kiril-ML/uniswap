@@ -10,7 +10,7 @@ import { Address, ERC20PairReadAPI } from '../../../types';
 type QueryParameters = {
   contractParameters: {
     address: Address;
-    provider: ethers.providers.Web3Provider;
+    provider: ethers.providers.JsonRpcProvider;
   };
   methods: Partial<RecordMethodsToItsParameters<ERC20PairReadAPI>>;
 };

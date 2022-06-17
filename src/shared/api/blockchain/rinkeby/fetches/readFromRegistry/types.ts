@@ -9,7 +9,7 @@ import { RegistryReadAPI } from '../../../types';
 
 type QueryParameters = {
   contractParameters: {
-    provider: ethers.providers.Web3Provider;
+    provider: ethers.providers.JsonRpcProvider;
   };
   methods: Partial<RecordMethodsToItsParameters<RegistryReadAPI>>;
 };

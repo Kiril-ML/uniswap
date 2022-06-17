@@ -10,7 +10,7 @@ import {
   TextField,
   Typography,
 } from 'src/shared/components';
-import { Item } from 'src/features/Provider/types';
+import { Token } from 'src/features/Provider/types';
 
 import {
   NumberInput,
@@ -19,16 +19,15 @@ import {
 import { createStyles } from './FieldWithAutocomplete.style';
 
 type Props = NumberInputProps & {
-  options: Item[];
-  optionValue?: Item | null;
-  shouldResetOption?: boolean;
-  value?: string;
+  options: Token[];
   balance: string | null;
+  max?: string;
+  value?: string;
   isMaxBtnDisplayed?: boolean;
   disabled?: boolean;
   handleAutocompleteChange: (
     event: SyntheticEvent<Element, Event>,
-    value: Item | null,
+    value: Token | null,
     reason: 'createOption' | 'selectOption' | 'removeOption' | 'blur' | 'clear'
   ) => void;
 };
@@ -36,6 +35,7 @@ type Props = NumberInputProps & {
 const FieldWithAutocomplete: FC<Props> = ({
   options,
   balance = '0',
+  max = '0',
   isMaxBtnDisplayed = false,
   disabled = false,
 
@@ -105,6 +105,14 @@ const FieldWithAutocomplete: FC<Props> = ({
                 noWrap
               >
                 Баланс: {balance ?? '0'}
+              </Typography>
+              <Typography
+                css={styles.captionBalance()}
+                variant="caption"
+                title={max ?? '0'}
+                noWrap
+              >
+                макс: {max ?? '0'}
               </Typography>
               {isMaxBtnDisplayed && (
                 <Button

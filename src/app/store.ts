@@ -5,8 +5,8 @@ import {
   ThunkAction,
 } from '@reduxjs/toolkit';
 import { createWrapper } from 'next-redux-wrapper';
-import { reducer as ProviderReducer } from 'src/features/Provider';
 
+import { reducer as ProviderReducer } from 'src/features/Provider';
 import { themeReducer } from 'src/services/theme';
 
 const makeStore = () =>

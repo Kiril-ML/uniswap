@@ -1,30 +1,21 @@
-/* eslint-disable */
-import { FC, useState, useEffect } from 'react';
-import { ethers } from 'ethers';
+import { FC } from 'react';
 import { useTheme } from '@mui/material';
-import { Rinkeby, useEtherBalance, useEthers, useToken } from '@usedapp/core';
-import { formatEther } from '@ethersproject/units';
-
-import { Item } from 'src/features/Provider/types';
 
 import { SwapForm } from './SwapForm/SwapForm';
 import { createStyles } from './Swap.style';
 
 type Props = {
-  items: Item[];
+  isLoading: boolean;
 };
 
-const Swap: FC<Props> = ({ items }) => {
+const Swap: FC<Props> = ({ isLoading }) => {
   const theme = useTheme();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const styles = createStyles(theme);
-
-  // const { library, account } = useEthers();
-  // const { data } = useAppSelector(selectProvider);
-  // const dispatch = useAppDispatch();
 
   // const signer = library?.getSigner();
 
-  return <SwapForm hint={<>{null}</>} items={items} />;
+  return <SwapForm isLoading={isLoading} hint={<>{null}</>} />;
 };
 
 export type { Props };
