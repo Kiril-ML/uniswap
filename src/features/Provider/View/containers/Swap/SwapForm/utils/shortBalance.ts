@@ -1,6 +1,4 @@
-const shortBalance = (tokenBalance: string | undefined) => {
-  if (tokenBalance === undefined) return null;
-
+const shortBalance = (tokenBalance: string) => {
   return Number(tokenBalance).toFixed(4);
 };
 

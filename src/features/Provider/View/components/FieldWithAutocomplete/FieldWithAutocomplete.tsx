@@ -20,8 +20,8 @@ import { createStyles } from './FieldWithAutocomplete.style';
 
 type Props = NumberInputProps & {
   options: Token[];
-  balance: string | null;
-  max?: string;
+  balance: string;
+  max: string;
   value?: string;
   isMaxBtnDisplayed?: boolean;
   disabled?: boolean;

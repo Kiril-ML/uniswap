@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import { BigNumber, formatUnits } from 'src/shared/helpers/blockchain/numbers';
 
 type Options = {
-  amountOut: ethers.BigNumber;
+  amountIn: ethers.BigNumber;
   balanceIn: ethers.BigNumber;
   balanceOut: ethers.BigNumber;
   fee: {
@@ -13,30 +13,33 @@ type Options = {
   decimals: number;
 };
 
-const calculateSwapIn = ({
-  amountOut,
+const calculateSwapOut = ({
+  amountIn,
   balanceIn,
   balanceOut,
   fee,
   decimals,
 }: Options) => {
+  if (balanceIn.lte(0)) {
+    return '0';
+  }
+
   const tenBigNumber = new BigNumber(10);
-  const amountOutBigNumber = new BigNumber(amountOut.toString());
+  const amountInBigNumber = new BigNumber(amountIn.toString());
   const balanceInBigNumber = new BigNumber(balanceIn.toString());
   const balanceOutBigNumber = new BigNumber(balanceOut.toString());
 
   const multiplier = tenBigNumber.pow(fee.decimals);
-  const amountIn = balanceInBigNumber
-    .times(amountOutBigNumber)
-    .times(multiplier)
-    .div(
-      balanceOutBigNumber
-        .minus(amountOutBigNumber)
-        .times(multiplier.minus(fee.amount.toString()))
-    )
+  const amountInWithFee = amountInBigNumber.times(
+    multiplier.minus(fee.amount.toString())
+  );
+
+  const amountOut = balanceOutBigNumber
+    .times(amountInWithFee)
+    .div(balanceInBigNumber.times(multiplier).plus(amountInWithFee))
     .toFixed(0);
 
-  return formatUnits(amountIn.toString(), decimals);
+  return formatUnits(amountOut.toString(), decimals);
 };
 
-export { calculateSwapIn };
+export { calculateSwapOut };

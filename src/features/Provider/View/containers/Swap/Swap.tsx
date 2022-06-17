@@ -15,7 +15,7 @@ const Swap: FC<Props> = ({ isLoading }) => {
 
   // const signer = library?.getSigner();
 
-  return <SwapForm isLoading={isLoading} hint={<>{null}</>} />;
+  return <SwapForm isLoading={isLoading} />;
 };
 
 export type { Props };

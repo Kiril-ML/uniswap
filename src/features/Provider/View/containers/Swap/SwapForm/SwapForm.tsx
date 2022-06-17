@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useTheme } from '@mui/material';
 import { useEthers } from '@usedapp/core';
-import { FC, ReactElement, SyntheticEvent, useEffect, useState } from 'react';
+import { FC, SyntheticEvent, useEffect, useState } from 'react';
+import { JsonRpcSigner } from '@ethersproject/providers';
 
 import { useAppDispatch, useAppSelector } from 'src/app/hooks';
 import { Token } from 'src/features/Provider/types';
@@ -13,12 +13,12 @@ import {
   InputAdornment,
   ArrowDown,
 } from 'src/shared/components';
+import { BigNumber, parseUnits } from 'src/shared/helpers/blockchain/numbers';
 import {
-  BigNumber,
-  formatUnits,
-  parseUnits,
-} from 'src/shared/helpers/blockchain/numbers';
-import { calculateSwapIn } from 'src/features/Provider/utils';
+  calculateMinOut,
+  calculateSwapIn,
+  calculateSwapOut,
+} from 'src/features/Provider/utils';
 
 import { selectProvider, swapIn } from '../../../../redux/slice';
 import {
@@ -31,16 +31,18 @@ import { createStyles } from './SwapForm.style';
 import { initialState, MAX_SLIPPAGE, MIN_SLIPPAGE } from './constants';
 import { changeButtonText } from './utils/changeButtonText';
 import { shortBalance } from './utils/shortBalance';
+import { findCurrentPair } from './utils/findCurrentPair';
+import { getPairBalance } from './utils/getPairBalance';
+import { Hint } from './Hint/Hint';
 
 type HandleAutocompleteChange =
   FieldWithAutocompleteProps['handleAutocompleteChange'];
 
 type Props = {
   isLoading: boolean;
-  hint?: ReactElement;
 };
 
-const SwapForm: FC<Props> = ({ hint, isLoading }) => {
+const SwapForm: FC<Props> = ({ isLoading }) => {
   const theme = useTheme();
   const styles = createStyles(theme);
 
@@ -59,9 +61,20 @@ const SwapForm: FC<Props> = ({ hint, isLoading }) => {
   );
   const [submitButtonText, setSubmitButtonText] =
     useState<SubmitButtonValue>('Подключите кошелек');
+  const [activeTransaction, setActiveTransaction] = useState(false);
 
   const { account, library } = useEthers();
-  const isShouldDisabled = account === undefined || isLoading;
+
+  let signer: JsonRpcSigner;
+
+  const isAuth = library !== undefined && account !== undefined;
+
+  if (isAuth) {
+    signer = library.getSigner();
+  }
+
+  const isShouldDisabled =
+    account === undefined || isLoading || activeTransaction;
 
   useEffect(() => {
     setSubmitButtonText(
@@ -71,10 +84,12 @@ const SwapForm: FC<Props> = ({ hint, isLoading }) => {
         isShouldDisabled,
         secondToken,
         secondTokenValue,
+        activeTransaction,
       })
     );
   }, [
     firstToken,
+    activeTransaction,
     firstTokenValue,
     isShouldDisabled,
     secondToken,
@@ -87,6 +102,7 @@ const SwapForm: FC<Props> = ({ hint, isLoading }) => {
   ) => {
     if (value === null) {
       setFirstToken(initialState.firstToken);
+      setFirstTokenValue('');
 
       return;
     }
@@ -100,6 +116,7 @@ const SwapForm: FC<Props> = ({ hint, isLoading }) => {
   ) => {
     if (value === null) {
       setSecondToken(initialState.secondToken);
+      setSecondTokenValue('');
 
       return;
     }
@@ -107,81 +124,123 @@ const SwapForm: FC<Props> = ({ hint, isLoading }) => {
     setSecondToken(value);
   };
 
-  let shouldReverse = false;
-  const currentPair = data.pairs.filter((pair) => {
-    const stringPairNames = pair.tokenNames.join('');
-    const stringFormNames = `${firstToken.name}${secondToken.name}`;
-    const reverseStringFormNames = `${secondToken.name}${firstToken.name}`;
-
-    if (stringPairNames === stringFormNames) {
-      shouldReverse = false;
-
-      return true;
-    }
-
-    if (stringPairNames === reverseStringFormNames) {
-      shouldReverse = true;
-
-      return true;
-    }
-
-    shouldReverse = false;
-
-    return false;
+  const { shouldReverse, currentPair } = findCurrentPair({
+    pairs: data.pairs,
+    firstTokenName: firstToken.name,
+    secondTokenName: secondToken.name,
   });
-
-  let signer;
-
-  if (account !== undefined) {
-    signer = library?.getSigner();
-  }
 
   const handleSubmit = (event: SyntheticEvent) => {
     event.preventDefault();
 
-    dispatch(
-      swapIn({
-        tokenInAddress: firstToken.address,
-        tokenInValue: parseUnits(firstTokenValue, firstToken.decimals),
-        tokenOutAddress: secondToken.address,
-        tokenOutMin: parseUnits(secondTokenValue, secondToken.decimals),
-        provider: library,
-        signer,
-      })
-    );
+    if (library !== undefined) {
+      dispatch(
+        swapIn({
+          tokenInAddress: firstToken.address,
+          tokenInValue: parseUnits(firstTokenValue, firstToken.decimals),
+          tokenOutAddress: secondToken.address,
+          tokenOutMin: parseUnits(
+            calculateMinOut({
+              amountOut: secondTokenValue,
+              slippage: Number(slippage),
+              decimals: secondToken.decimals,
+            }),
+            secondToken.decimals
+          ),
+          provider: library,
+          signer,
+        })
+      ).then(() => setActiveTransaction(false));
+
+      setFirstTokenValue('');
+      setSecondTokenValue('');
+
+      setActiveTransaction(true);
+    }
 
     // console.log(data, 'data');
   };
 
+  const [pairBalanceIn, pairBalanceOut] = getPairBalance({
+    pair: currentPair,
+    shouldReverse,
+  });
+
   const handleFirstTokenValueChange = (
     event: SyntheticEvent<HTMLInputElement>
   ) => {
-    if (event.currentTarget !== undefined) {
-      setFirstTokenValue(() => {
-        if (firstToken.name !== '' && secondToken.name !== '') {
-          const secondValue =
-            +event.currentTarget.value / +currentPair[0].proportion;
-          setSecondTokenValue(secondValue.toFixed(4));
-        }
+    setFirstTokenValue((prevValue) => {
+      if (event.currentTarget === null) return prevValue;
+      const newValue = event.currentTarget.value;
 
-        return event.currentTarget.value;
+      if (Number.isNaN(Number(newValue))) {
+        return prevValue;
+      }
+
+      return newValue;
+    });
+
+    const newValue = event.currentTarget.value;
+
+    const shouldUpdateSecondValue =
+      firstToken.name !== '' &&
+      secondToken.name !== '' &&
+      !Number.isNaN(Number(newValue)) &&
+      newValue !== '' &&
+      pairBalanceIn !== null &&
+      pairBalanceOut !== null;
+
+    if (shouldUpdateSecondValue) {
+      const newSecondValue = calculateSwapOut({
+        amountIn: parseUnits(newValue, firstToken.decimals),
+        balanceIn: parseUnits(pairBalanceIn, firstToken.decimals),
+        balanceOut: parseUnits(pairBalanceOut, secondToken.decimals),
+        fee: {
+          amount: parseUnits(data.fee.value, data.fee.decimals),
+          decimals: data.fee.decimals,
+        },
+        decimals: Math.max(firstToken.decimals, secondToken.decimals),
       });
+      setSecondTokenValue(newSecondValue);
     }
   };
 
   const handleSecondTokenValueChange = (
     event: SyntheticEvent<HTMLInputElement>
   ) => {
-    if (event.currentTarget !== undefined) {
-      setSecondTokenValue(() => {
-        if (firstToken.name !== '' && secondToken.name !== '') {
-          const secondValue =
-            +event.currentTarget.value / +currentPair[0].proportion;
-          setFirstTokenValue(secondValue.toFixed(4));
-        }
+    setSecondTokenValue((prevValue) => {
+      if (event.currentTarget === null) return prevValue;
+      const newValue = event.currentTarget.value;
 
-        return event.currentTarget.value;
+      if (Number.isNaN(Number(newValue))) {
+        return prevValue;
+      }
+
+      return newValue;
+    });
+
+    const newValue = event.currentTarget.value;
+
+    const shouldUpdateSecondValue =
+      firstToken.name !== '' &&
+      secondToken.name !== '' &&
+      !Number.isNaN(Number(newValue)) &&
+      newValue !== '' &&
+      pairBalanceIn !== null &&
+      pairBalanceOut !== null;
+
+    if (shouldUpdateSecondValue) {
+      const newSecondValue = calculateSwapIn({
+        amountOut: parseUnits(newValue, firstToken.decimals),
+        balanceIn: parseUnits(pairBalanceIn, firstToken.decimals),
+        balanceOut: parseUnits(pairBalanceOut, secondToken.decimals),
+        fee: {
+          amount: parseUnits(data.fee.value, data.fee.decimals),
+          decimals: data.fee.decimals,
+        },
+        decimals: Math.max(firstToken.decimals, secondToken.decimals),
       });
+      setFirstTokenValue(newSecondValue);
     }
   };
 
@@ -198,22 +257,16 @@ const SwapForm: FC<Props> = ({ hint, isLoading }) => {
   let maxTokenIn = '0';
   let tokenOutMaxToSet = '0';
 
-  if (currentPair.length !== 0) {
+  if (pairBalanceIn !== null && pairBalanceOut !== null) {
     maxTokenIn = BigNumber.min(
       firstToken.userBalance,
-      currentPair[0].tokens[0].pairBalance
+      pairBalanceIn
     ).toString();
 
-    tokenOutMaxToSet = calculateSwapIn({
+    tokenOutMaxToSet = calculateSwapOut({
       amountIn: parseUnits(maxTokenIn, firstToken.decimals),
-      balanceIn: parseUnits(
-        currentPair[0].tokens[0].pairBalance,
-        firstToken.decimals
-      ),
-      balanceOut: parseUnits(
-        currentPair[0].tokens[1].pairBalance,
-        secondToken.decimals
-      ),
+      balanceIn: parseUnits(pairBalanceIn, firstToken.decimals),
+      balanceOut: parseUnits(pairBalanceOut, secondToken.decimals),
       fee: {
         amount: parseUnits(data.fee.value, data.fee.decimals),
         decimals: data.fee.decimals,
@@ -221,8 +274,6 @@ const SwapForm: FC<Props> = ({ hint, isLoading }) => {
       decimals: Math.max(firstToken.decimals, secondToken.decimals),
     });
   }
-
-  // console.log(currentPair, 'currentPair', swapOutValue);
 
   return (
     <Card
@@ -246,7 +297,7 @@ const SwapForm: FC<Props> = ({ hint, isLoading }) => {
                 (token) => token.name !== secondToken.name
               )}
               isMaxBtnDisplayed
-              max={maxTokenIn}
+              max={shortBalance(maxTokenIn)}
             />
             <Box css={styles.arrow()}>
               <ArrowDown></ArrowDown>
@@ -261,9 +312,17 @@ const SwapForm: FC<Props> = ({ hint, isLoading }) => {
               options={tokens.filter((token) => token.name !== firstToken.name)}
               handleAutocompleteChange={handleSecondTokenAutocompleteChange}
               disabled={isShouldDisabled}
-              max={tokenOutMaxToSet}
+              max={shortBalance(tokenOutMaxToSet)}
             />
-            {hint}
+            <Hint
+              pair={currentPair}
+              shouldReverse={shouldReverse}
+              firstToken={firstToken}
+              secondToken={secondToken}
+              firstTokenValue={firstTokenValue}
+              secondTokenValue={secondTokenValue}
+              slippage={+slippage}
+            ></Hint>
             <Box>
               <Typography>Допустимое проскальзывание ?</Typography>
               <NumberInput

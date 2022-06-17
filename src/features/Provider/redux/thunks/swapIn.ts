@@ -12,7 +12,7 @@ type Options = {
   tokenInValue: ethers.BigNumber;
   tokenOutAddress: string;
   tokenOutMin: ethers.BigNumber;
-  provider: ethers.providers.Web3Provider;
+  provider: ethers.providers.JsonRpcProvider;
   signer: ethers.Signer;
 };
 

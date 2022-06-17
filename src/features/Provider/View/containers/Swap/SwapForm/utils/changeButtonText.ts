@@ -1,18 +1,28 @@
 import { Token } from 'src/features/Provider/types';
 
+import { SubmitButtonValue } from '../../types';
+
+type Args = {
+  firstToken: Token;
+  secondToken: Token;
+  firstTokenValue: string;
+  secondTokenValue: string;
+  isShouldDisabled: boolean;
+  activeTransaction: boolean;
+};
+
 const changeButtonText = ({
   firstToken,
   secondToken,
   firstTokenValue,
   secondTokenValue,
   isShouldDisabled,
-}: {
-  firstToken: Token;
-  secondToken: Token;
-  firstTokenValue: string;
-  secondTokenValue: string;
-  isShouldDisabled: boolean;
-}) => {
+  activeTransaction,
+}: Args): SubmitButtonValue => {
+  if (activeTransaction) {
+    return 'Идет транзакция...';
+  }
+
   if (isShouldDisabled) {
     return 'Подключите кошелек';
   }

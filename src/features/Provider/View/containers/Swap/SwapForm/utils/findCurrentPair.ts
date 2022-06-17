@@ -28,8 +28,6 @@ const findCurrentPair = ({
       return true;
     }
 
-    shouldReverse = false;
-
     return false;
   });
 
@@ -37,7 +35,7 @@ const findCurrentPair = ({
     return { currentPair: currentPair[0], shouldReverse };
   }
 
-  return null;
+  return { currentPair: null, shouldReverse };
 };
 
 export { findCurrentPair };
