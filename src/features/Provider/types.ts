@@ -3,11 +3,13 @@ import { RequestStatus } from 'src/shared/helpers/redux';
 type State = {
   status: RequestStatus;
   error: string | null;
-  data: {
-    tokens: Token[];
-    pairs: Pair[];
-    fee: Fee;
-  };
+  data: Data;
+};
+
+type Data = {
+  tokens: Token[];
+  pairs: Pair[];
+  fee: Fee;
 };
 
 type Token = {
@@ -33,4 +35,4 @@ type Fee = {
   decimals: number;
 };
 
-export type { State, Token, Pair, Fee };
+export type { State, Token, Pair, Fee, Data };

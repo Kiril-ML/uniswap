@@ -16,6 +16,9 @@ type Props = {
   secondTokenValue: string;
   slippage: number;
   shouldReverse: boolean;
+  maxTokenIn: string;
+  maxTokenOut: string;
+  handelButtonDisabled: (shouldDisabledButton: boolean) => void;
 };
 
 const Hint: FC<Props> = ({
@@ -26,6 +29,9 @@ const Hint: FC<Props> = ({
   secondTokenValue,
   slippage,
   shouldReverse,
+  maxTokenIn,
+  maxTokenOut,
+  handelButtonDisabled,
 }) => {
   const theme = useTheme();
   const styles = createStyles(theme);
@@ -34,8 +40,27 @@ const Hint: FC<Props> = ({
   let commissionHint = '';
   let slippageHint = '';
 
+  const isTokensChosen = firstToken.name !== '' && secondToken.name !== '';
+  const isValueBiggerMax =
+    isTokensChosen &&
+    (+maxTokenIn < +firstTokenValue || +maxTokenOut < +secondTokenValue);
+
+  handelButtonDisabled(isValueBiggerMax);
+
+  const isInsufficientLiquidity = pair?.proportion === 'any';
+  const isPairExist = !(isTokensChosen && pair === null);
+
+  const isInsufficientUserBalance =
+    isTokensChosen &&
+    (new BigNumber(firstToken.userBalance).decimalPlaces(5).lt('0.00001') ||
+      new BigNumber(secondToken.userBalance).decimalPlaces(5).lt('0.00001'));
+
   const shouldCalculateProportion =
-    pair !== null && firstToken.name !== '' && secondToken.name !== '';
+    pair !== null &&
+    isTokensChosen &&
+    !isInsufficientLiquidity &&
+    !isInsufficientUserBalance &&
+    isPairExist;
 
   if (shouldCalculateProportion) {
     const proportion = shouldReverse ? 1 / +pair.proportion : pair.proportion;
@@ -75,13 +100,33 @@ const Hint: FC<Props> = ({
 
   return (
     <Box css={styles.root()}>
+      {isInsufficientLiquidity && (
+        <Typography css={styles.insufficientAmount()} color="error">
+          Недостаточно ликвидности
+        </Typography>
+      )}
+      {isValueBiggerMax && (
+        <Typography css={styles.insufficientAmount()} color="error">
+          Неверное количество
+        </Typography>
+      )}
+      {!isPairExist && (
+        <Typography css={styles.insufficientAmount()} color="error">
+          Выбранная пара не найдена в пуле ликвидности
+        </Typography>
+      )}
+      {isInsufficientUserBalance && (
+        <Typography css={styles.insufficientAmount()} color="error">
+          Недостаточно средств
+        </Typography>
+      )}
       {shouldCalculateProportion && (
         <Typography css={styles.caption()}>{proportionHint}</Typography>
       )}
-      {shouldCalculateCommission && (
+      {shouldCalculateCommission && !isValueBiggerMax && (
         <Typography css={styles.caption()}>{commissionHint}</Typography>
       )}
-      {shouldCalculateCommission && (
+      {shouldCalculateCommission && !isValueBiggerMax && (
         <Typography css={styles.caption()}>{slippageHint}</Typography>
       )}
     </Box>

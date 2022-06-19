@@ -14,11 +14,7 @@ import {
   ArrowDown,
 } from 'src/shared/components';
 import { BigNumber, parseUnits } from 'src/shared/helpers/blockchain/numbers';
-import {
-  calculateMinOut,
-  calculateSwapIn,
-  calculateSwapOut,
-} from 'src/features/Provider/utils';
+import { calculateMinOut, calculateSwapOut } from 'src/features/Provider/utils';
 
 import { selectProvider, swapIn } from '../../../../redux/slice';
 import {
@@ -29,11 +25,14 @@ import { NumberInput } from '../../../components/NumberInput/NumberInput';
 import { SubmitButtonValue } from '../types';
 import { createStyles } from './SwapForm.style';
 import { initialState, MAX_SLIPPAGE, MIN_SLIPPAGE } from './constants';
-import { changeButtonText } from './utils/changeButtonText';
-import { shortBalance } from './utils/shortBalance';
-import { findCurrentPair } from './utils/findCurrentPair';
-import { getPairBalance } from './utils/getPairBalance';
 import { Hint } from './Hint/Hint';
+import {
+  calculateNeighborInputValue,
+  getPairBalance,
+  findCurrentPair,
+  shortBalance,
+  changeButtonText,
+} from './utils';
 
 type HandleAutocompleteChange =
   FieldWithAutocompleteProps['handleAutocompleteChange'];
@@ -62,6 +61,7 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
   const [submitButtonText, setSubmitButtonText] =
     useState<SubmitButtonValue>('Подключите кошелек');
   const [activeTransaction, setActiveTransaction] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
 
   const { account, library } = useEthers();
 
@@ -180,28 +180,24 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
       return newValue;
     });
 
-    const newValue = event.currentTarget.value;
+    const {
+      newNeighborValue,
+      shouldUpdateNeighborValue,
+      shouldResetNeighborValue,
+    } = calculateNeighborInputValue({
+      data,
+      newValue: event.currentTarget.value,
+      firstToken,
+      pairBalanceIn,
+      pairBalanceOut,
+      secondToken,
+      neighbor: 'second',
+    });
 
-    const shouldUpdateSecondValue =
-      firstToken.name !== '' &&
-      secondToken.name !== '' &&
-      !Number.isNaN(Number(newValue)) &&
-      newValue !== '' &&
-      pairBalanceIn !== null &&
-      pairBalanceOut !== null;
-
-    if (shouldUpdateSecondValue) {
-      const newSecondValue = calculateSwapOut({
-        amountIn: parseUnits(newValue, firstToken.decimals),
-        balanceIn: parseUnits(pairBalanceIn, firstToken.decimals),
-        balanceOut: parseUnits(pairBalanceOut, secondToken.decimals),
-        fee: {
-          amount: parseUnits(data.fee.value, data.fee.decimals),
-          decimals: data.fee.decimals,
-        },
-        decimals: Math.max(firstToken.decimals, secondToken.decimals),
-      });
-      setSecondTokenValue(newSecondValue);
+    if (shouldUpdateNeighborValue) {
+      setSecondTokenValue(newNeighborValue);
+    } else if (shouldResetNeighborValue) {
+      setSecondTokenValue('');
     }
   };
 
@@ -219,28 +215,24 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
       return newValue;
     });
 
-    const newValue = event.currentTarget.value;
+    const {
+      newNeighborValue,
+      shouldUpdateNeighborValue,
+      shouldResetNeighborValue,
+    } = calculateNeighborInputValue({
+      data,
+      newValue: event.currentTarget.value,
+      firstToken,
+      pairBalanceIn,
+      pairBalanceOut,
+      secondToken,
+      neighbor: 'first',
+    });
 
-    const shouldUpdateSecondValue =
-      firstToken.name !== '' &&
-      secondToken.name !== '' &&
-      !Number.isNaN(Number(newValue)) &&
-      newValue !== '' &&
-      pairBalanceIn !== null &&
-      pairBalanceOut !== null;
-
-    if (shouldUpdateSecondValue) {
-      const newSecondValue = calculateSwapIn({
-        amountOut: parseUnits(newValue, firstToken.decimals),
-        balanceIn: parseUnits(pairBalanceIn, firstToken.decimals),
-        balanceOut: parseUnits(pairBalanceOut, secondToken.decimals),
-        fee: {
-          amount: parseUnits(data.fee.value, data.fee.decimals),
-          decimals: data.fee.decimals,
-        },
-        decimals: Math.max(firstToken.decimals, secondToken.decimals),
-      });
-      setFirstTokenValue(newSecondValue);
+    if (shouldUpdateNeighborValue) {
+      setFirstTokenValue(Number(newNeighborValue).toFixed(4));
+    } else if (shouldResetNeighborValue) {
+      setFirstTokenValue('');
     }
   };
 
@@ -255,7 +247,7 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
   };
 
   let maxTokenIn = '0';
-  let tokenOutMaxToSet = '0';
+  let maxTokenOut = '0';
 
   if (pairBalanceIn !== null && pairBalanceOut !== null) {
     maxTokenIn = BigNumber.min(
@@ -263,7 +255,7 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
       pairBalanceIn
     ).toString();
 
-    tokenOutMaxToSet = calculateSwapOut({
+    maxTokenOut = calculateSwapOut({
       amountIn: parseUnits(maxTokenIn, firstToken.decimals),
       balanceIn: parseUnits(pairBalanceIn, firstToken.decimals),
       balanceOut: parseUnits(pairBalanceOut, secondToken.decimals),
@@ -274,6 +266,30 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
       decimals: Math.max(firstToken.decimals, secondToken.decimals),
     });
   }
+
+  const handelButtonDisabled = (shouldDisabledButton: boolean) => {
+    setButtonDisabled(shouldDisabledButton);
+  };
+
+  const handleMaxClick = () => {
+    const isTokensChosen = firstToken.name !== '' && secondToken.name !== '';
+
+    if (isTokensChosen) {
+      setFirstTokenValue(maxTokenIn);
+
+      const { newNeighborValue } = calculateNeighborInputValue({
+        data,
+        newValue: maxTokenIn,
+        firstToken,
+        pairBalanceIn,
+        pairBalanceOut,
+        secondToken,
+        neighbor: 'second',
+      });
+
+      setSecondTokenValue(newNeighborValue);
+    }
+  };
 
   return (
     <Card
@@ -298,6 +314,7 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
               )}
               isMaxBtnDisplayed
               max={shortBalance(maxTokenIn)}
+              handleMaxClick={handleMaxClick}
             />
             <Box css={styles.arrow()}>
               <ArrowDown></ArrowDown>
@@ -312,7 +329,7 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
               options={tokens.filter((token) => token.name !== firstToken.name)}
               handleAutocompleteChange={handleSecondTokenAutocompleteChange}
               disabled={isShouldDisabled}
-              max={shortBalance(tokenOutMaxToSet)}
+              max={shortBalance(maxTokenOut)}
             />
             <Hint
               pair={currentPair}
@@ -322,6 +339,9 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
               firstTokenValue={firstTokenValue}
               secondTokenValue={secondTokenValue}
               slippage={+slippage}
+              maxTokenIn={maxTokenIn}
+              maxTokenOut={maxTokenOut}
+              handelButtonDisabled={handelButtonDisabled}
             ></Hint>
             <Box>
               <Typography>Допустимое проскальзывание ?</Typography>
@@ -345,7 +365,7 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
               css={styles.button()}
               variant="contained"
               fullWidth
-              disabled={isShouldDisabled}
+              disabled={isShouldDisabled || buttonDisabled}
             >
               {submitButtonText}
             </Button>

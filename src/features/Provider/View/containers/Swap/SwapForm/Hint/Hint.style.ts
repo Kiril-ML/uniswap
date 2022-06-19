@@ -11,6 +11,10 @@ const createStyles = (theme: Theme) => ({
     font-size: ${theme.typography.pxToRem(12)};
     color: ${theme.palette.grey[600]};
   `,
+  insufficientAmount: () => css`
+    font-size: ${theme.typography.pxToRem(16)};
+    color: ${theme.palette.error.main};
+  `,
 });
 
 export { createStyles };
