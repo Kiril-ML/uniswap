@@ -22,6 +22,7 @@ type Props = NumberInputProps & {
   options: Token[];
   balance: string;
   max: string;
+  optionsValue: Token;
   isMaxBtnDisplayed?: boolean;
   disabled?: boolean;
   handleAutocompleteChange: (
@@ -36,6 +37,7 @@ const FieldWithAutocomplete: FC<Props> = ({
   options,
   balance,
   max,
+  optionsValue,
   isMaxBtnDisplayed = false,
   disabled = false,
   handleMaxClick,
@@ -61,6 +63,7 @@ const FieldWithAutocomplete: FC<Props> = ({
             <Autocomplete
               css={styles.autocomplete()}
               options={options}
+              value={optionsValue}
               isOptionEqualToValue={(option, value) =>
                 option.name === value?.name
               }

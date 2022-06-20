@@ -33,15 +33,15 @@ const getPairs = async ({
         return registry;
       }
 
-      const address = registry.getPair || '0x0';
-      const hasPair = !/^0x0+$/.test(address);
+      const pairAddress = registry.getPair || '0x0';
+      const hasPair = !/^0x0+$/.test(pairAddress);
 
       if (!hasPair) {
         return null;
       }
 
       const pair = await fetchReadFromERC20({
-        contractParameters: { address, provider },
+        contractParameters: { address: pairAddress, provider },
         methods: { balanceOf: [userAddress], decimals: [] },
       });
 
@@ -51,7 +51,7 @@ const getPairs = async ({
 
       const pairToken0 = await fetchReadFromERC20({
         contractParameters: { address: token0.address, provider },
-        methods: { balanceOf: [address], name: [] },
+        methods: { balanceOf: [pairAddress], name: [] },
       });
 
       if (isError(pairToken0)) {
@@ -60,7 +60,7 @@ const getPairs = async ({
 
       const pairToken1 = await fetchReadFromERC20({
         contractParameters: { address: token1.address, provider },
-        methods: { balanceOf: [address], name: [] },
+        methods: { balanceOf: [pairAddress], name: [] },
       });
 
       if (isError(pairToken1)) {

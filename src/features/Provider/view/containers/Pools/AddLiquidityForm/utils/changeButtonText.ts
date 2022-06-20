@@ -45,7 +45,7 @@ const changeButtonText = ({
     firstTokenValue !== '' &&
     secondTokenValue !== ''
   ) {
-    return 'Обменять';
+    return 'Добавить ликвидность';
   }
 
   return 'Подключите кошелек';

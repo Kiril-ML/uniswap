@@ -1,5 +1,5 @@
 import { useTheme } from '@mui/material';
-import { useContractFunction, useEthers } from '@usedapp/core';
+import { useEthers } from '@usedapp/core';
 import { FC, SyntheticEvent, useEffect, useState } from 'react';
 import { JsonRpcSigner } from '@ethersproject/providers';
 
@@ -14,13 +14,13 @@ import {
   ArrowDown,
 } from 'src/shared/components';
 import { BigNumber, parseUnits } from 'src/shared/helpers/blockchain/numbers';
-import { calculateMinOut, calculateSwapOut } from 'src/features/Provider/utils';
 import {
-  createReadRegistry,
-  createWriteToERC20,
-  createWriteToRouter,
-} from 'src/shared/api/blockchain/rinkeby/createContract';
-import { contracts } from 'src/shared/api/blockchain/rinkeby/constants';
+  calculateMinOut,
+  calculateSwapOut,
+  findCurrentPair,
+  shortBalance,
+  getPairBalance,
+} from 'src/features/Provider/utils';
 
 import { selectProvider, swapIn } from '../../../../redux/slice';
 import {
@@ -28,29 +28,20 @@ import {
   Props as FieldWithAutocompleteProps,
 } from '../../../components/FieldWithAutocomplete/FieldWithAutocomplete';
 import { NumberInput } from '../../../components/NumberInput/NumberInput';
-import { SubmitButtonValue } from '../types';
+import { SubmitButtonValue } from './types';
 import { createStyles } from './SwapForm.style';
 import { initialState, MAX_SLIPPAGE, MIN_SLIPPAGE } from './constants';
 import { Hint } from './Hint/Hint';
-import {
-  calculateNeighborInputValue,
-  getPairBalance,
-  findCurrentPair,
-  shortBalance,
-  changeButtonText,
-} from './utils';
-import { useRegistry } from './useRegistry';
-import { useApprove } from './useApprove';
+import { calculateNeighborInputValue, changeButtonText } from './utils';
 
 type HandleAutocompleteChange =
   FieldWithAutocompleteProps['handleAutocompleteChange'];
 
 type Props = {
   isLoading: boolean;
-  onSubmit: () => void;
 };
 
-const SwapForm: FC<Props> = ({ isLoading, onSubmit }) => {
+const SwapForm: FC<Props> = ({ isLoading }) => {
   const theme = useTheme();
   const styles = createStyles(theme);
 
@@ -152,80 +143,36 @@ const SwapForm: FC<Props> = ({ isLoading, onSubmit }) => {
     secondTokenName: secondToken.name,
   });
 
-  // const readRegistryContract = createReadRegistry(library);
-  // const writeERC20Contract = createWriteToERC20(firstTokenValue, signer);
-  // const writeRouterContract = createWriteToRouter(signer);
-
-  const approve = useApprove(firstTokenValue, signer);
-
   const handleSubmit = (event: SyntheticEvent) => {
     event.preventDefault();
 
-    if (approve !== null) {
-      const { send, state } = approve;
-      console.log(state, 'state');
-      console.log(contracts.router.address, 'contracts.router.address');
-      console.log(firstTokenValue, 'firstTokenValue');
-      send(contracts.router.address, firstTokenValue);
-    }
-    // const { send: sendGetPair, state } = useContractFunction(
-    //   readRegistryContract,
-    //   'getPair'
-    // );
-    // const { send: sendApprove } = useContractFunction(
-    //   writeERC20Contract,
-    //   'approve'
-    // );
-    // const { send: sendSwapIn } = useContractFunction(
-    //   writeRouterContract,
-    //   'swapIn'
-    // );
+    console.log(data);
 
-    // sendGetPair(firstToken.address, secondToken.address).then(() => {
-    //   console.log(state, 'state');
-
-    //   sendApprove(contracts.router.address, firstTokenValue).then(() => {
-    //     sendSwapIn(
-    //       firstToken.address,
-    //       secondToken.address,
-    //       firstTokenValue,
-    //       parseUnits(
+    // if (signer !== null && library !== undefined) {
+    //   dispatch(
+    //     swapIn({
+    //       tokenInAddress: firstToken.address,
+    //       tokenInValue: parseUnits(firstTokenValue, firstToken.decimals),
+    //       tokenOutAddress: secondToken.address,
+    //       tokenOutMin: parseUnits(
     //         calculateMinOut({
     //           amountOut: secondTokenValue,
     //           slippage: Number(slippage),
     //           decimals: secondToken.decimals,
     //         }),
     //         secondToken.decimals
-    //       )
-    //     );
-    //   });
-    // });
+    //       ),
+    //       provider: library,
+    //       signer,
+    //     })
+    //   ).then(() => setActiveTransaction(false));
 
-    // if (library !== undefined) {
-    // dispatch(
-    //   swapIn({
-    //     tokenInAddress: firstToken.address,
-    //     tokenInValue: parseUnits(firstTokenValue, firstToken.decimals),
-    //     tokenOutAddress: secondToken.address,
-    // tokenOutMin: parseUnits(
-    //   calculateMinOut({
-    //     amountOut: secondTokenValue,
-    //     slippage: Number(slippage),
-    //     decimals: secondToken.decimals,
-    //   }),
-    //   secondToken.decimals
-    // ),
-    //     provider: library,
-    //     signer,
-    //   })
-    // ).then(() => setActiveTransaction(false));
+    //   setFirstTokenValue('');
+    //   setFirstToken(initialState.firstToken);
+    //   setSecondToken(initialState.secondToken);
+    //   setSecondTokenValue('');
 
-    // setFirstTokenValue('');
-    // setSecondTokenValue('');
-
-    // setActiveTransaction(true);
-
-    // onSubmit();
+    //   setActiveTransaction(true);
     // }
   };
 
@@ -383,6 +330,7 @@ const SwapForm: FC<Props> = ({ isLoading, onSubmit }) => {
               isMaxBtnDisplayed
               max={shortBalance(maxTokenIn)}
               handleMaxClick={handleMaxClick}
+              optionsValue={firstToken}
             />
             <Box css={styles.arrow()}>
               <ArrowDown></ArrowDown>
@@ -398,6 +346,7 @@ const SwapForm: FC<Props> = ({ isLoading, onSubmit }) => {
               handleAutocompleteChange={handleSecondTokenAutocompleteChange}
               disabled={isShouldDisabled}
               max={shortBalance(maxTokenOut)}
+              optionsValue={secondToken}
             />
             <Hint
               pair={currentPair}
