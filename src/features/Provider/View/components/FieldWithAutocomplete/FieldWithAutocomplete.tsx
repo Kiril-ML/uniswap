@@ -22,7 +22,6 @@ type Props = NumberInputProps & {
   options: Token[];
   balance: string;
   max: string;
-  value?: string;
   isMaxBtnDisplayed?: boolean;
   disabled?: boolean;
   handleAutocompleteChange: (
@@ -35,8 +34,8 @@ type Props = NumberInputProps & {
 
 const FieldWithAutocomplete: FC<Props> = ({
   options,
-  balance = '0',
-  max = '0',
+  balance,
+  max,
   isMaxBtnDisplayed = false,
   disabled = false,
   handleMaxClick,

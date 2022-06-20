@@ -1,7 +1,9 @@
+/* eslint-disable*/
 import { useTheme } from '@mui/material';
-import { useEthers } from '@usedapp/core';
+import { useEthers, useContractFunction } from '@usedapp/core';
 import { FC, SyntheticEvent, useEffect, useState } from 'react';
 import { JsonRpcSigner } from '@ethersproject/providers';
+import { Contract } from 'ethers';
 
 import { useAppDispatch, useAppSelector } from 'src/app/hooks';
 import { Token } from 'src/features/Provider/types';
@@ -15,6 +17,8 @@ import {
 } from 'src/shared/components';
 import { BigNumber, parseUnits } from 'src/shared/helpers/blockchain/numbers';
 import { calculateMinOut, calculateSwapOut } from 'src/features/Provider/utils';
+import { contracts } from 'src/shared/api/blockchain/rinkeby/constants';
+import { ERC20ABI } from 'src/shared/api/blockchain/constants';
 
 import { selectProvider, swapIn } from '../../../../redux/slice';
 import {
@@ -130,33 +134,74 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
     secondTokenName: secondToken.name,
   });
 
+  const { registry, router } = contracts;
+  const { address, ABI } = registry;
+  const { address: routerAddress, ABI: routerABI } = router;
+
+  const contract = new Contract(address, ABI, library);
+  const contractERC20 = new Contract(firstToken.address, ERC20ABI, signer);
+  const contractRouter = new Contract(routerAddress, routerABI, signer);
+  const { state, send } = useContractFunction(contract, 'getPair');
+  const { state: ERC20State, send: ERC20Send } = useContractFunction(
+    contractERC20,
+    'approve'
+  );
+  const { state: routerState, send: routerSend } = useContractFunction(
+    contractRouter,
+    'swapIn'
+  );
+
   const handleSubmit = (event: SyntheticEvent) => {
     event.preventDefault();
 
-    if (library !== undefined) {
-      dispatch(
-        swapIn({
-          tokenInAddress: firstToken.address,
-          tokenInValue: parseUnits(firstTokenValue, firstToken.decimals),
-          tokenOutAddress: secondToken.address,
-          tokenOutMin: parseUnits(
+    send(
+      '0x63706eDd35835972F46dd3EB09Ad4405d4e3A168',
+      '0x781F8B032eFd365e56EC96564874937966Fb00e1'
+    ).then(() =>
+      ERC20Send(
+        '0xBDb54E3B3e019E37eD741304960F0C68fb09F4E8',
+        parseUnits(firstTokenValue, firstToken.decimals)
+      ).then(() =>
+        routerSend(
+          firstToken.address,
+          secondToken.address,
+          parseUnits(firstTokenValue, firstToken.decimals),
+          parseUnits(
             calculateMinOut({
               amountOut: secondTokenValue,
               slippage: Number(slippage),
               decimals: secondToken.decimals,
             }),
             secondToken.decimals
-          ),
-          provider: library,
-          signer,
-        })
-      ).then(() => setActiveTransaction(false));
+          )
+        )
+      )
+    );
 
-      setFirstTokenValue('');
-      setSecondTokenValue('');
+    // if (library !== undefined) {
+    //   dispatch(
+    //     swapIn({
+    //       tokenInAddress: firstToken.address,
+    // tokenInValue: parseUnits(firstTokenValue, firstToken.decimals),
+    //       tokenOutAddress: secondToken.address,
+    //       tokenOutMin: parseUnits(
+    //         calculateMinOut({
+    //           amountOut: secondTokenValue,
+    //           slippage: Number(slippage),
+    //           decimals: secondToken.decimals,
+    //         }),
+    //         secondToken.decimals
+    //       ),
+    //       provider: library,
+    //       signer,
+    //     })
+    //   ).then(() => setActiveTransaction(false));
 
-      setActiveTransaction(true);
-    }
+    //   setFirstTokenValue('');
+    //   setSecondTokenValue('');
+
+    //   setActiveTransaction(true);
+    // }
 
     // console.log(data, 'data');
   };
