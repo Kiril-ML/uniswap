@@ -1,21 +1,38 @@
+import { useContractFunction, useEthers } from '@usedapp/core';
 import { FC } from 'react';
-import { useTheme } from '@mui/material';
+
+import {
+  createReadRegistry,
+  createWriteToERC20,
+  createWriteToRouter,
+} from 'src/shared/api/blockchain/rinkeby/createContract';
 
 import { SwapForm } from './SwapForm/SwapForm';
-import { createStyles } from './Swap.style';
 
 type Props = {
   isLoading: boolean;
 };
 
 const Swap: FC<Props> = ({ isLoading }) => {
-  const theme = useTheme();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const styles = createStyles(theme);
+  const { library } = useEthers();
 
-  // const signer = library?.getSigner();
+  let readRegistryContract;
+  let writeERC20Contract;
+  let writeRouterContract;
 
-  return <SwapForm isLoading={isLoading} />;
+  const { send } = useContractFunction(readRegistryContract, 'getPair');
+
+  const onSubmit = ({ tokenInAddress }) => {
+    if (library !== undefined) {
+      const signer = library.getSigner();
+
+      readRegistryContract = createReadRegistry(library);
+      writeERC20Contract = createWriteToERC20(tokenInAddress, signer);
+      writeRouterContract = createWriteToRouter(signer);
+    }
+  };
+
+  return <SwapForm isLoading={isLoading} onSubmit={onSubmit} />;
 };
 
 export type { Props };

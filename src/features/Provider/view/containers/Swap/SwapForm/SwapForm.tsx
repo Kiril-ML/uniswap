@@ -1,5 +1,5 @@
 import { useTheme } from '@mui/material';
-import { useEthers } from '@usedapp/core';
+import { useContractFunction, useEthers } from '@usedapp/core';
 import { FC, SyntheticEvent, useEffect, useState } from 'react';
 import { JsonRpcSigner } from '@ethersproject/providers';
 
@@ -15,6 +15,12 @@ import {
 } from 'src/shared/components';
 import { BigNumber, parseUnits } from 'src/shared/helpers/blockchain/numbers';
 import { calculateMinOut, calculateSwapOut } from 'src/features/Provider/utils';
+import {
+  createReadRegistry,
+  createWriteToERC20,
+  createWriteToRouter,
+} from 'src/shared/api/blockchain/rinkeby/createContract';
+import { contracts } from 'src/shared/api/blockchain/rinkeby/constants';
 
 import { selectProvider, swapIn } from '../../../../redux/slice';
 import {
@@ -33,15 +39,18 @@ import {
   shortBalance,
   changeButtonText,
 } from './utils';
+import { useRegistry } from './useRegistry';
+import { useApprove } from './useApprove';
 
 type HandleAutocompleteChange =
   FieldWithAutocompleteProps['handleAutocompleteChange'];
 
 type Props = {
   isLoading: boolean;
+  onSubmit: () => void;
 };
 
-const SwapForm: FC<Props> = ({ isLoading }) => {
+const SwapForm: FC<Props> = ({ isLoading, onSubmit }) => {
   const theme = useTheme();
   const styles = createStyles(theme);
 
@@ -65,7 +74,7 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
 
   const { account, library } = useEthers();
 
-  let signer: JsonRpcSigner;
+  let signer: JsonRpcSigner | null = null;
 
   const isAuth = library !== undefined && account !== undefined;
 
@@ -75,6 +84,13 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
 
   const isShouldDisabled =
     account === undefined || isLoading || activeTransaction;
+
+  const shouldButtonDisabled =
+    submitButtonText !== 'Обменять' ||
+    isShouldDisabled ||
+    buttonDisabled ||
+    new BigNumber(firstTokenValue).isZero() ||
+    new BigNumber(secondTokenValue).isZero();
 
   useEffect(() => {
     setSubmitButtonText(
@@ -136,35 +152,81 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
     secondTokenName: secondToken.name,
   });
 
+  // const readRegistryContract = createReadRegistry(library);
+  // const writeERC20Contract = createWriteToERC20(firstTokenValue, signer);
+  // const writeRouterContract = createWriteToRouter(signer);
+
+  const approve = useApprove(firstTokenValue, signer);
+
   const handleSubmit = (event: SyntheticEvent) => {
     event.preventDefault();
 
-    if (library !== undefined) {
-      dispatch(
-        swapIn({
-          tokenInAddress: firstToken.address,
-          tokenInValue: parseUnits(firstTokenValue, firstToken.decimals),
-          tokenOutAddress: secondToken.address,
-          tokenOutMin: parseUnits(
-            calculateMinOut({
-              amountOut: secondTokenValue,
-              slippage: Number(slippage),
-              decimals: secondToken.decimals,
-            }),
-            secondToken.decimals
-          ),
-          provider: library,
-          signer,
-        })
-      ).then(() => setActiveTransaction(false));
-
-      setFirstTokenValue('');
-      setSecondTokenValue('');
-
-      setActiveTransaction(true);
+    if (approve !== null) {
+      const { send, state } = approve;
+      console.log(state, 'state');
+      console.log(contracts.router.address, 'contracts.router.address');
+      console.log(firstTokenValue, 'firstTokenValue');
+      send(contracts.router.address, firstTokenValue);
     }
+    // const { send: sendGetPair, state } = useContractFunction(
+    //   readRegistryContract,
+    //   'getPair'
+    // );
+    // const { send: sendApprove } = useContractFunction(
+    //   writeERC20Contract,
+    //   'approve'
+    // );
+    // const { send: sendSwapIn } = useContractFunction(
+    //   writeRouterContract,
+    //   'swapIn'
+    // );
 
-    // console.log(data, 'data');
+    // sendGetPair(firstToken.address, secondToken.address).then(() => {
+    //   console.log(state, 'state');
+
+    //   sendApprove(contracts.router.address, firstTokenValue).then(() => {
+    //     sendSwapIn(
+    //       firstToken.address,
+    //       secondToken.address,
+    //       firstTokenValue,
+    //       parseUnits(
+    //         calculateMinOut({
+    //           amountOut: secondTokenValue,
+    //           slippage: Number(slippage),
+    //           decimals: secondToken.decimals,
+    //         }),
+    //         secondToken.decimals
+    //       )
+    //     );
+    //   });
+    // });
+
+    // if (library !== undefined) {
+    // dispatch(
+    //   swapIn({
+    //     tokenInAddress: firstToken.address,
+    //     tokenInValue: parseUnits(firstTokenValue, firstToken.decimals),
+    //     tokenOutAddress: secondToken.address,
+    // tokenOutMin: parseUnits(
+    //   calculateMinOut({
+    //     amountOut: secondTokenValue,
+    //     slippage: Number(slippage),
+    //     decimals: secondToken.decimals,
+    //   }),
+    //   secondToken.decimals
+    // ),
+    //     provider: library,
+    //     signer,
+    //   })
+    // ).then(() => setActiveTransaction(false));
+
+    // setFirstTokenValue('');
+    // setSecondTokenValue('');
+
+    // setActiveTransaction(true);
+
+    // onSubmit();
+    // }
   };
 
   const [pairBalanceIn, pairBalanceOut] = getPairBalance({
@@ -371,7 +433,7 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
               css={styles.button()}
               variant="contained"
               fullWidth
-              disabled={isShouldDisabled || buttonDisabled}
+              disabled={shouldButtonDisabled}
             >
               {submitButtonText}
             </Button>
