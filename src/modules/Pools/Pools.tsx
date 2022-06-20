@@ -1,8 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useTheme } from '@mui/material';
 
 import { Header } from 'src/modules/shared/components';
-import { useAppDispatch } from 'src/app/hooks';
 import { DefaultLayout } from 'src/modules/shared/pageTemplates';
 import type { NextPageWithLayout } from 'src/shared/types';
 import { Box, PageHead, Typography } from 'src/shared/components';

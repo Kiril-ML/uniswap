@@ -1,21 +1,15 @@
-/* eslint-disable */
-import { FC, useState, useEffect } from 'react';
-import { ethers } from 'ethers';
+import { FC, useState } from 'react';
 import { useTheme } from '@mui/material';
-import { Rinkeby, useEtherBalance, useEthers, useToken } from '@usedapp/core';
-import { formatEther } from '@ethersproject/units';
-
-import { Item } from 'src/features/Provider/types';
 
 import { createStyles } from './Pools.style';
 import { AddLiquidityForm } from './AddLiquidityForm/AddLiquidityForm';
 import { RemoveLiquidityForm } from './RemoveLiquidityForm/RemoveLiquidityForm';
 
 type Props = {
-  items: Item[];
+  items?: any;
 };
 
-const Pools: FC<Props> = ({ items }) => {
+const Pools: FC<Props> = () => {
   const theme = useTheme();
   const styles = createStyles(theme);
 
@@ -23,22 +17,16 @@ const Pools: FC<Props> = ({ items }) => {
     'AddLiquidity'
   );
 
-  // const { library, account } = useEthers();
-  // const { data } = useAppSelector(selectProvider);
-  // const dispatch = useAppDispatch();
-
-  // const signer = library?.getSigner();
-
   return formType === 'AddLiquidity' ? (
     <AddLiquidityForm
+      css={styles.root()}
       hint={<>{null}</>}
-      items={items}
       handleChangeForm={setFormType}
     />
   ) : (
     <RemoveLiquidityForm
-      items={items}
       handleChangeForm={setFormType}
+      pairs={[]}
     ></RemoveLiquidityForm>
   );
 };

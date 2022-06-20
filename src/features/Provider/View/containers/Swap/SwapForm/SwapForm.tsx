@@ -100,7 +100,10 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
     event,
     value
   ) => {
-    if (value === null) {
+    const shouldReset =
+      value === null || typeof value === 'string' || Array.isArray(value);
+
+    if (shouldReset) {
       setFirstToken(initialState.firstToken);
       setFirstTokenValue('');
 
@@ -114,7 +117,10 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
     event,
     value
   ) => {
-    if (value === null) {
+    const shouldReset =
+      value === null || typeof value === 'string' || Array.isArray(value);
+
+    if (shouldReset) {
       setSecondToken(initialState.secondToken);
       setSecondTokenValue('');
 

@@ -26,7 +26,7 @@ type Props = NumberInputProps & {
   disabled?: boolean;
   handleAutocompleteChange: (
     event: SyntheticEvent<Element, Event>,
-    value: Token | null,
+    value: Token | null | string | (string | Token)[],
     reason: 'createOption' | 'selectOption' | 'removeOption' | 'blur' | 'clear'
   ) => void;
   handleMaxClick?: () => void;

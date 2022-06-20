@@ -1,15 +1,13 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 
-import { Box, Props } from './Box';
+import { Box } from './Box';
 
 const Meta: ComponentMeta<typeof Box> = {
   title: 'components/Box',
   component: Box,
 };
 
-const Template: ComponentStory<typeof Box> = (props: Props) => (
-  <Box {...props} />
-);
+const Template: ComponentStory<typeof Box> = (props) => <Box {...props} />;
 
 const Default = Template.bind({});
 Default.args = {};

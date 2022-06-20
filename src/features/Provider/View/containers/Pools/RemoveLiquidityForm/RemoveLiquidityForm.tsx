@@ -1,18 +1,16 @@
-/* eslint-disable*/
-import { formatUnits } from '@ethersproject/units';
 import { WifiProtectedSetup } from '@mui/icons-material';
 import { useTheme } from '@mui/material';
 import { useEthers } from '@usedapp/core';
 import { Dispatch, FC, SetStateAction } from 'react';
 
-import { Item } from 'src/features/Provider/types';
+import { Pair } from 'src/features/Provider/types';
 import { Box, Button, Card, Typography } from 'src/shared/components';
 
 import { NumberInput } from '../../../components/NumberInput/NumberInput';
 import { createStyles } from './RemoveLiquidityForm.style';
 
 type Props = {
-  pairs: any[];
+  pairs: Pair[];
   handleChangeForm: Dispatch<
     SetStateAction<'RemoveLiquidity' | 'AddLiquidity'>
   >;
@@ -51,13 +49,13 @@ const RemoveLiquidityForm: FC<Props> = ({ pairs = [], handleChangeForm }) => {
               {pairs.length === 0 ? (
                 <Typography align="center">У вас пока нет пар</Typography>
               ) : (
-                pairs.map(() => {
+                pairs.map((pair) => (
                   <Box
                     css={styles.pair()}
-                    key={pairs.tokens.map(({ name }) => name).toString()}
+                    key={pair.tokens.map(({ name }) => name).toString()}
                   >
                     <Typography css={styles.pairTitle()}>
-                      {`${pairs.tokens.map(({ name }) => name).join(' + ')}:`}
+                      {`${pair.tokens.map(({ name }) => name).join(' + ')}:`}
                     </Typography>
                     <NumberInput
                       InputProps={{
@@ -74,8 +72,8 @@ const RemoveLiquidityForm: FC<Props> = ({ pairs = [], handleChangeForm }) => {
                     >
                       ВЫВЕСТИ
                     </Button>
-                  </Box>;
-                })
+                  </Box>
+                ))
               )}
             </Box>
           </>
