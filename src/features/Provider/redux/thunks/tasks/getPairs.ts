@@ -100,7 +100,7 @@ const getPairs = async ({
       }
 
       return {
-        address,
+        address: pairAddress,
         tokenNames: [token0.name, token1.name] as [string, string],
         tokens: [
           { ...token0, pairBalance: formattedBalanceOfToken0 },
