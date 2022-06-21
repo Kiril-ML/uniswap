@@ -10,7 +10,7 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
-import { createEmotionCache, initAxe } from 'src/core';
+import { createEmotionCache } from 'src/core';
 import { wrapper } from 'src/app/store';
 import { ThemeProvider } from 'src/services/theme';
 import type { NextPageWithLayout } from 'src/shared/types';
@@ -21,7 +21,7 @@ import { DefaultLayout } from 'src/modules/shared/pageTemplates';
  * Accessibility tool - outputs to devtools console on dev only and client-side only.
  * @see https://github.com/dequelabs/axe-core-npm/blob/develop/packages/react/README.md
  */
-initAxe();
+// initAxe();
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();

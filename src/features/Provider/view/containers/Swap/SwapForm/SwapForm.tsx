@@ -146,7 +146,7 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
   const handleSubmit = (event: SyntheticEvent) => {
     event.preventDefault();
 
-    console.log(data);
+    // console.log(data);
 
     if (signer !== null && library !== undefined) {
       dispatch(

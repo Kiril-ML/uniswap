@@ -19,8 +19,9 @@ import {
   getPairBalance,
   shortBalance,
 } from 'src/features/Provider/utils';
+import { contracts } from 'src/shared/api/blockchain/rinkeby/constants';
 import { Box, Card } from 'src/shared/components';
-import { BigNumber } from 'src/shared/helpers/blockchain/numbers';
+import { BigNumber, parseUnits } from 'src/shared/helpers/blockchain/numbers';
 
 import {
   FieldWithAutocomplete,
@@ -28,7 +29,9 @@ import {
 } from '../../../components/FieldWithAutocomplete/FieldWithAutocomplete';
 import { initialState } from '../../Swap/SwapForm/constants';
 import { createStyles } from './AddLiquidityForm.style';
+import { Hint } from './Hint/Hint';
 import { SubmitButtonValue } from './types';
+import { calculateMaxValue, calculateProportion } from './utils';
 import { changeButtonText } from './utils/changeButtonText';
 
 type HandleAutocompleteChange =
@@ -58,6 +61,7 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
   const [activeTransaction, setActiveTransaction] = useState(false);
   const [submitButtonText, setSubmitButtonText] =
     useState<SubmitButtonValue>('Подключите кошелек');
+  const [buttonDisabled, setButtonDisabled] = useState(false);
 
   const { account, library } = useEthers();
 
@@ -71,6 +75,13 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
 
   const isShouldDisabled =
     account === undefined || isLoading || activeTransaction;
+
+  const shouldButtonDisabled =
+    submitButtonText !== 'Добавить ликвидность' ||
+    isShouldDisabled ||
+    buttonDisabled ||
+    new BigNumber(firstTokenValue).isZero() ||
+    new BigNumber(secondTokenValue).isZero();
 
   useEffect(() => {
     setSubmitButtonText(
@@ -105,10 +116,6 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
 
   const onClickChangeForm = () => {
     handleChangeForm('RemoveLiquidity');
-  };
-
-  const handleSubmit = (event: SyntheticEvent) => {
-    event.preventDefault();
   };
 
   const handleFirstTokenAutocompleteChange: HandleAutocompleteChange = (
@@ -159,25 +166,24 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
       return newValue;
     });
 
-    // const {
-    //   newNeighborValue,
-    //   shouldUpdateNeighborValue,
-    //   shouldResetNeighborValue,
-    // } = calculateNeighborInputValue({
-    //   data,
-    //   newValue: event.currentTarget.value,
-    //   firstToken,
-    //   pairBalanceIn,
-    //   pairBalanceOut,
-    //   secondToken,
-    //   neighbor: 'second',
-    // });
+    const proportion = calculateProportion({
+      pair: currentPair,
+      firstToken,
+      secondToken,
+      shouldReverse,
+    });
 
-    // if (shouldUpdateNeighborValue) {
-    //   setSecondTokenValue(newNeighborValue);
-    // } else if (shouldResetNeighborValue) {
-    //   setSecondTokenValue('');
-    // }
+    const shouldUpdate =
+      !Number.isNaN(Number(event.currentTarget.value)) &&
+      event.currentTarget.value !== '' &&
+      proportion !== null;
+
+    if (shouldUpdate) {
+      const newValue = new BigNumber(event.currentTarget.value)
+        .div(proportion)
+        .toFixed(5);
+      setSecondTokenValue(newValue);
+    }
   };
 
   const handleSecondTokenValueChange = (
@@ -194,48 +200,67 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
       return newValue;
     });
 
-    // const {
-    //   newNeighborValue,
-    //   shouldUpdateNeighborValue,
-    //   shouldResetNeighborValue,
-    // } = calculateNeighborInputValue({
-    //   data,
-    //   newValue: event.currentTarget.value,
-    //   firstToken,
-    //   pairBalanceIn,
-    //   pairBalanceOut,
-    //   secondToken,
-    //   neighbor: 'first',
-    // });
+    const proportion = calculateProportion({
+      pair: currentPair,
+      firstToken,
+      secondToken,
+      shouldReverse,
+    });
 
-    // if (shouldUpdateNeighborValue) {
-    //   setFirstTokenValue(Number(newNeighborValue).toFixed(4));
-    // } else if (shouldResetNeighborValue) {
-    //   setFirstTokenValue('');
-    // }
+    const shouldUpdate =
+      !Number.isNaN(Number(event.currentTarget.value)) &&
+      event.currentTarget.value !== '' &&
+      proportion !== null;
+
+    if (shouldUpdate) {
+      const newValue = new BigNumber(event.currentTarget.value)
+        .times(proportion)
+        .toFixed(5);
+      setFirstTokenValue(newValue);
+    }
   };
 
-  switch (currentPair?.proportion) {
-    case 'any': {
-      console.log('пропорция любая');
+  const [maxFirstToken, maxSecondToken] = calculateMaxValue({
+    pair: currentPair,
+    firstToken,
+    secondToken,
+    shouldReverse,
+  });
 
-      break;
-    }
-    case '': {
-      console.log('');
+  const handelButtonDisabled = (shouldDisabledButton: boolean) => {
+    setButtonDisabled(shouldDisabledButton);
+  };
 
-      break;
-    }
-    default: {
-      console.log(
-        `пропорция: ${new BigNumber(currentPair?.proportion)
-          .decimalPlaces(5)
-          .toString()}`
-      );
+  // const contractFirstERC20 = createWriteToERC20(firstToken.address, signer);
+  // const contractSecondERC20 = createWriteToERC20(secondToken.address, signer);
 
-      break;
-    }
-  }
+  // const { send: firstTokenSend, state } = useContractFunction(
+  //   contractFirstERC20,
+  //   'approve'
+  // );
+  // const { send: secondTokenSend } = useContractFunction(
+  //   contractSecondERC20,
+  //   'approve'
+  // );
+
+  const handleSubmit = async (event: SyntheticEvent) => {
+    event.preventDefault();
+
+    // firstTokenSend(
+    //   contracts.router.address,
+    //   parseUnits(firstTokenValue, firstToken.decimals)
+    // ).then(() => {
+    //   console.log(state);
+
+    //   secondTokenSend(contracts.router.address, secondTokenValue);
+    // });
+
+    // await firstTokenSend(
+    //   contracts.router.address,
+    //   parseUnits(firstTokenValue, firstToken.decimals)
+    // );
+    // console.log(state);
+  };
 
   return (
     <Card
@@ -268,7 +293,7 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
                 (token) => token.name !== secondToken.name
               )}
               isMaxBtnDisplayed
-              max={''}
+              max={shortBalance(maxFirstToken)}
               optionsValue={firstToken}
             />
             <Box css={styles.arrow()}>+</Box>
@@ -282,16 +307,26 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
               options={tokens.filter((token) => token.name !== firstToken.name)}
               handleAutocompleteChange={handleSecondTokenAutocompleteChange}
               disabled={isShouldDisabled}
-              max={''}
+              max={shortBalance(maxSecondToken)}
               optionsValue={secondToken}
             />
-
+            <Hint
+              pair={currentPair}
+              firstToken={firstToken}
+              secondToken={secondToken}
+              firstTokenValue={firstTokenValue}
+              secondTokenValue={secondTokenValue}
+              shouldReverse={shouldReverse}
+              maxTokenIn={maxFirstToken}
+              maxTokenOut={maxSecondToken}
+              handelButtonDisabled={handelButtonDisabled}
+            ></Hint>
             <Button
               type="submit"
               css={styles.button()}
               variant="contained"
               fullWidth
-              disabled={isShouldDisabled}
+              disabled={shouldButtonDisabled}
             >
               {submitButtonText}
             </Button>
