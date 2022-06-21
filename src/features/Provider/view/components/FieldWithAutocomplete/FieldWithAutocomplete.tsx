@@ -67,7 +67,11 @@ const FieldWithAutocomplete: FC<Props> = ({
               isOptionEqualToValue={(option, value) =>
                 option.name === value?.name
               }
-              getOptionLabel={({ symbol }) => symbol}
+              getOptionLabel={(option) => {
+                if (typeof option !== 'string') return option.symbol;
+
+                return '';
+              }}
               renderOption={(props, option) => (
                 <Box css={styles.option()} component="li" {...props}>
                   <Box css={styles.optionAvatar()}>

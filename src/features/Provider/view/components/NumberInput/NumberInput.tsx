@@ -9,6 +9,7 @@ type Props = Pick<
 > & {
   value?: string | number | null;
   max?: string | number;
+  css?: any;
 };
 
 const NumberInput: FC<Props> = ({ ...textFieldProps }) => {

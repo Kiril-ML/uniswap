@@ -148,32 +148,32 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
 
     console.log(data);
 
-    // if (signer !== null && library !== undefined) {
-    //   dispatch(
-    //     swapIn({
-    //       tokenInAddress: firstToken.address,
-    //       tokenInValue: parseUnits(firstTokenValue, firstToken.decimals),
-    //       tokenOutAddress: secondToken.address,
-    //       tokenOutMin: parseUnits(
-    //         calculateMinOut({
-    //           amountOut: secondTokenValue,
-    //           slippage: Number(slippage),
-    //           decimals: secondToken.decimals,
-    //         }),
-    //         secondToken.decimals
-    //       ),
-    //       provider: library,
-    //       signer,
-    //     })
-    //   ).then(() => setActiveTransaction(false));
+    if (signer !== null && library !== undefined) {
+      dispatch(
+        swapIn({
+          tokenInAddress: firstToken.address,
+          tokenInValue: parseUnits(firstTokenValue, firstToken.decimals),
+          tokenOutAddress: secondToken.address,
+          tokenOutMin: parseUnits(
+            calculateMinOut({
+              amountOut: secondTokenValue,
+              slippage: Number(slippage),
+              decimals: secondToken.decimals,
+            }),
+            secondToken.decimals
+          ),
+          provider: library,
+          signer,
+        })
+      ).then(() => setActiveTransaction(false));
 
-    //   setFirstTokenValue('');
-    //   setFirstToken(initialState.firstToken);
-    //   setSecondToken(initialState.secondToken);
-    //   setSecondTokenValue('');
+      setFirstTokenValue('');
+      setFirstToken(initialState.firstToken);
+      setSecondToken(initialState.secondToken);
+      setSecondTokenValue('');
 
-    //   setActiveTransaction(true);
-    // }
+      setActiveTransaction(true);
+    }
   };
 
   const [pairBalanceIn, pairBalanceOut] = getPairBalance({
