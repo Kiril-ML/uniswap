@@ -6,10 +6,10 @@ import { AddLiquidityForm } from './AddLiquidityForm/AddLiquidityForm';
 import { RemoveLiquidityForm } from './RemoveLiquidityForm/RemoveLiquidityForm';
 
 type Props = {
-  items?: any;
+  isLoading: boolean;
 };
 
-const Pools: FC<Props> = () => {
+const Pools: FC<Props> = ({ isLoading }) => {
   const theme = useTheme();
   const styles = createStyles(theme);
 
@@ -18,11 +18,7 @@ const Pools: FC<Props> = () => {
   );
 
   return formType === 'AddLiquidity' ? (
-    <AddLiquidityForm
-      css={styles.root()}
-      hint={<>{null}</>}
-      handleChangeForm={setFormType}
-    />
+    <AddLiquidityForm isLoading={isLoading} handleChangeForm={setFormType} />
   ) : (
     <RemoveLiquidityForm
       handleChangeForm={setFormType}

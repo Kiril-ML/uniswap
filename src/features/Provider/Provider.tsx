@@ -53,7 +53,7 @@ const Provider: FC<Props> = ({ view }) => {
           return (
             <>
               {shouldDisplayProgress && <LinearProgress position="fixed-top" />}
-              <Pools items={[]} />
+              <Pools isLoading={isLoading} />
             </>
           );
         }
