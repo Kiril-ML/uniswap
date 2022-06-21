@@ -7,8 +7,8 @@ import { isError } from 'src/shared/types/guards';
 type Options = {
   tokenInAddress: string;
   tokenOutAddress: string;
-  provider: ethers.providers.Web3Provider;
-  signer: ethers.Signer;
+  provider: ethers.providers.JsonRpcProvider;
+  signer: ethers.providers.JsonRpcSigner;
 };
 
 const createPair = async ({

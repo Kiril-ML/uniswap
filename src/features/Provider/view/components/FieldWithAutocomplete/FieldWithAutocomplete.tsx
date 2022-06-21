@@ -65,7 +65,7 @@ const FieldWithAutocomplete: FC<Props> = ({
               options={options}
               value={optionsValue}
               isOptionEqualToValue={(option, value) =>
-                option.name === value?.name
+                option.decimals === value.decimals
               }
               getOptionLabel={(option) => {
                 if (typeof option !== 'string') return option.symbol;

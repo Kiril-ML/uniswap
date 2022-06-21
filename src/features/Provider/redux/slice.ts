@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { defaults } from 'lodash';
 
 import { initialState } from './initialState';
-import { getData, swapIn } from './thunks';
+import { addLiquidity, getData, swapIn } from './thunks';
 import { selectProvider } from './selectors';
 
 const slice = createSlice({
@@ -34,6 +34,16 @@ const slice = createSlice({
       .addCase(swapIn.rejected, (state, action) => {
         state.status = 'rejected';
         state.error = action.error.message ?? '';
+      })
+      .addCase(addLiquidity.pending, (state) => {
+        state.status = 'pending';
+      })
+      .addCase(addLiquidity.fulfilled, (state) => {
+        state.status = 'fulfilled';
+      })
+      .addCase(addLiquidity.rejected, (state, action) => {
+        state.status = 'rejected';
+        state.error = action.error.message ?? '';
       });
   },
 });
@@ -42,4 +52,4 @@ const { setFeeValue } = slice.actions;
 
 const { reducer } = slice;
 
-export { reducer, selectProvider, setFeeValue, getData, swapIn };
+export { reducer, selectProvider, getData, swapIn, addLiquidity, setFeeValue };

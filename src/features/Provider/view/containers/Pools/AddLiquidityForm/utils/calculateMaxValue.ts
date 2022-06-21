@@ -27,19 +27,19 @@ const calculateMaxValue = ({
 
   const proportion = shouldReverse ? 1 / +pair.proportion : pair.proportion;
 
-  const maxToken2 = new BigNumber(firstToken.userBalance)
-    .div(proportion)
-    .toString();
-  const token2MaxToSet = new BigNumber(maxToken2).gt(secondToken.userBalance)
-    ? secondToken.userBalance
-    : maxToken2;
-
   const maxToken1 = new BigNumber(secondToken.userBalance)
     .times(proportion)
     .toString();
   const token1MaxToSet = new BigNumber(maxToken1).gt(firstToken.userBalance)
     ? firstToken.userBalance
     : maxToken1;
+
+  const maxToken2 = new BigNumber(firstToken.userBalance)
+    .div(proportion)
+    .toString();
+  const token2MaxToSet = new BigNumber(maxToken2).gt(secondToken.userBalance)
+    ? secondToken.userBalance
+    : maxToken2;
 
   return [token1MaxToSet, token2MaxToSet];
 };

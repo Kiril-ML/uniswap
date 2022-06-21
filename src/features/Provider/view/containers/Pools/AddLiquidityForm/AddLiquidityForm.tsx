@@ -13,13 +13,9 @@ import {
 
 import { useAppDispatch, useAppSelector } from 'src/app/hooks';
 import { selectProvider } from 'src/features/Provider/redux/selectors';
+import { addLiquidity } from 'src/features/Provider/redux/thunks';
 import { Token } from 'src/features/Provider/types';
-import {
-  findCurrentPair,
-  getPairBalance,
-  shortBalance,
-} from 'src/features/Provider/utils';
-import { contracts } from 'src/shared/api/blockchain/rinkeby/constants';
+import { findCurrentPair, shortBalance } from 'src/features/Provider/utils';
 import { Box, Card } from 'src/shared/components';
 import { BigNumber, parseUnits } from 'src/shared/helpers/blockchain/numbers';
 
@@ -109,11 +105,6 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
     secondTokenName: secondToken.name,
   });
 
-  const [pairBalanceIn, pairBalanceOut] = getPairBalance({
-    pair: currentPair,
-    shouldReverse,
-  });
-
   const onClickChangeForm = () => {
     handleChangeForm('RemoveLiquidity');
   };
@@ -181,7 +172,7 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
     if (shouldUpdate) {
       const newValue = new BigNumber(event.currentTarget.value)
         .div(proportion)
-        .toFixed(5);
+        .toString();
       setSecondTokenValue(newValue);
     }
   };
@@ -215,7 +206,7 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
     if (shouldUpdate) {
       const newValue = new BigNumber(event.currentTarget.value)
         .times(proportion)
-        .toFixed(5);
+        .toString();
       setFirstTokenValue(newValue);
     }
   };
@@ -231,35 +222,28 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
     setButtonDisabled(shouldDisabledButton);
   };
 
-  // const contractFirstERC20 = createWriteToERC20(firstToken.address, signer);
-  // const contractSecondERC20 = createWriteToERC20(secondToken.address, signer);
-
-  // const { send: firstTokenSend, state } = useContractFunction(
-  //   contractFirstERC20,
-  //   'approve'
-  // );
-  // const { send: secondTokenSend } = useContractFunction(
-  //   contractSecondERC20,
-  //   'approve'
-  // );
-
-  const handleSubmit = async (event: SyntheticEvent) => {
+  const handleSubmit = (event: SyntheticEvent) => {
     event.preventDefault();
 
-    // firstTokenSend(
-    //   contracts.router.address,
-    //   parseUnits(firstTokenValue, firstToken.decimals)
-    // ).then(() => {
-    //   console.log(state);
+    if (library !== undefined && signer !== null) {
+      dispatch(
+        addLiquidity({
+          tokenInAddress: firstToken.address,
+          tokenInValue: parseUnits(firstTokenValue, firstToken.decimals),
+          tokenOutAddress: secondToken.address,
+          tokenOutValue: parseUnits(secondTokenValue, secondToken.decimals),
+          provider: library,
+          signer,
+        })
+      ).then(() => setActiveTransaction(false));
 
-    //   secondTokenSend(contracts.router.address, secondTokenValue);
-    // });
+      setFirstTokenValue('');
+      setFirstToken(initialState.firstToken);
+      setSecondToken(initialState.secondToken);
+      setSecondTokenValue('');
 
-    // await firstTokenSend(
-    //   contracts.router.address,
-    //   parseUnits(firstTokenValue, firstToken.decimals)
-    // );
-    // console.log(state);
+      setActiveTransaction(true);
+    }
   };
 
   return (
@@ -274,7 +258,7 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
                 variant="text"
                 size="small"
                 endIcon={<WifiProtectedSetup />}
-                // disabled={switchBtn.disabled}
+                disabled={isShouldDisabled}
                 onClick={onClickChangeForm}
               >
                 МОИ ПАРЫ
@@ -309,6 +293,7 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
               disabled={isShouldDisabled}
               max={shortBalance(maxSecondToken)}
               optionsValue={secondToken}
+              isMaxBtnDisplayed
             />
             <Hint
               pair={currentPair}

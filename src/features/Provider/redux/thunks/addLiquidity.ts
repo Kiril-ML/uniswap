@@ -14,8 +14,8 @@ type Options = {
   tokenInValue: ethers.BigNumber;
   tokenOutAddress: string;
   tokenOutValue: ethers.BigNumber;
-  provider: ethers.providers.Web3Provider;
-  signer: ethers.Signer;
+  provider: ethers.providers.JsonRpcProvider;
+  signer: ethers.providers.JsonRpcSigner;
 };
 
 const addLiquidity = createAsyncThunk(
@@ -50,10 +50,6 @@ const addLiquidity = createAsyncThunk(
         provider,
         signer,
       });
-
-      if (isError(registry)) {
-        Promise.reject(registry);
-      }
     }
 
     if (isError(registry)) {
