@@ -7,21 +7,26 @@ type Props = Pick<
   Parameters<typeof TextField>['0'],
   'disabled' | 'InputProps' | 'variant' | 'inputProps'
 > & {
-  value?: string | number | null;
-  max?: string | number;
+  isCalculating?: boolean;
   css?: any;
 };
 
-const NumberInput: FC<Props> = ({ ...textFieldProps }) => {
+const NumberInput: FC<Props> = ({
+  isCalculating = false,
+  ...textFieldProps
+}) => {
+  const style = isCalculating ? { color: 'transparent' } : {};
+  const placeholder = isCalculating ? '' : '0.0';
+
   return (
     <NumberFormat
-      style={{ borderColor: 'transparent' }}
       allowNegative={false}
       customInput={TextField}
       {...textFieldProps}
       InputProps={{
         inputMode: 'decimal',
-        placeholder: '0.0',
+        placeholder,
+        style,
         ...textFieldProps.InputProps,
       }}
     />

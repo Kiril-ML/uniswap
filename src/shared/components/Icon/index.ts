@@ -7,6 +7,7 @@ import { LabelIcon } from './LabelIcon/LabelIcon';
 import { SadEmoticon } from './SadEmoticon/SadEmoticon';
 import { ArrowDown } from './ArrowDown/ArrowDown';
 import { Logout } from './Logout/Logout';
+import { WifiProtectedSetup } from './WifiProtectedSetup/WifiProtectedSetup';
 
 export {
   Check,
@@ -18,4 +19,5 @@ export {
   LabelIcon,
   SadEmoticon,
   ArrowDown,
+  WifiProtectedSetup,
 };

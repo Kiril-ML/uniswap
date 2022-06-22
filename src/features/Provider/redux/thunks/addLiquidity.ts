@@ -6,6 +6,7 @@ import { fetchWriteToRouter } from 'src/shared/api/blockchain/rinkeby/fetches/wr
 import { fetchWriteToERC20 } from 'src/shared/api/blockchain/rinkeby/fetches/writeToERC20';
 import { contracts } from 'src/shared/api/blockchain/rinkeby/constants';
 import { isError } from 'src/shared/types/guards';
+import { fetchReadFromERC20Pair } from 'src/shared/api/blockchain/rinkeby/fetches/readFromERC20Pair';
 
 import { createPair } from './tasks';
 
@@ -60,48 +61,57 @@ const addLiquidity = createAsyncThunk(
       return Promise.reject(new Error('registry.getPair result is undefined'));
     }
 
-    const txTokenIn = await fetchWriteToERC20({
-      contractParameters: { address: tokenInAddress, signer },
-      methods: {
-        approve: [contracts.router.address, tokenInValue],
-      },
+    const pairAddress = registry.getPair;
+    const reserves = await fetchReadFromERC20Pair({
+      contractParameters: { address: pairAddress, provider },
+      methods: { reserves: [] },
     });
 
-    if (isError(txTokenIn)) {
-      return Promise.reject(txTokenIn);
-    }
+    console.log(pairAddress, 'pairAddress');
+    console.log(reserves.reserves, 'reserves');
 
-    const txTokenOut = await fetchWriteToERC20({
-      contractParameters: { address: tokenOutAddress, signer },
-      methods: {
-        approve: [contracts.router.address, tokenOutValue],
-      },
-    });
+    // const txTokenIn = await fetchWriteToERC20({
+    //   contractParameters: { address: tokenInAddress, signer },
+    //   methods: {
+    //     approve: [contracts.router.address, tokenInValue],
+    //   },
+    // });
 
-    if (isError(txTokenOut)) {
-      return Promise.reject(txTokenOut);
-    }
+    // if (isError(txTokenIn)) {
+    //   return Promise.reject(txTokenIn);
+    // }
 
-    await txTokenIn.approve.wait();
-    await txTokenOut.approve.wait();
+    // const txTokenOut = await fetchWriteToERC20({
+    //   contractParameters: { address: tokenOutAddress, signer },
+    //   methods: {
+    //     approve: [contracts.router.address, tokenOutValue],
+    //   },
+    // });
 
-    const txRouter = await fetchWriteToRouter({
-      contractParameters: { signer },
-      methods: {
-        addLiquidity: [
-          tokenInAddress,
-          tokenOutAddress,
-          tokenInValue,
-          tokenOutValue,
-        ],
-      },
-    });
+    // if (isError(txTokenOut)) {
+    //   return Promise.reject(txTokenOut);
+    // }
 
-    if (isError(txRouter)) {
-      return Promise.reject(txRouter);
-    }
+    // await txTokenIn.approve.wait();
+    // await txTokenOut.approve.wait();
 
-    await txRouter.addLiquidity.wait();
+    // const txRouter = await fetchWriteToRouter({
+    //   contractParameters: { signer },
+    //   methods: {
+    //     addLiquidity: [
+    //       tokenInAddress,
+    //       tokenOutAddress,
+    //       tokenInValue,
+    //       tokenOutValue,
+    //     ],
+    //   },
+    // });
+
+    // if (isError(txRouter)) {
+    //   return Promise.reject(txRouter);
+    // }
+
+    // await txRouter.addLiquidity.wait();
 
     return undefined;
   }

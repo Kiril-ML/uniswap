@@ -1,4 +1,3 @@
-import { WifiProtectedSetup } from '@mui/icons-material';
 import { Button, Typography, useTheme } from '@mui/material';
 import { useEthers } from '@usedapp/core';
 import { ethers } from 'ethers';
@@ -16,7 +15,7 @@ import { selectProvider } from 'src/features/Provider/redux/selectors';
 import { addLiquidity } from 'src/features/Provider/redux/thunks';
 import { Token } from 'src/features/Provider/types';
 import { findCurrentPair, shortBalance } from 'src/features/Provider/utils';
-import { Box, Card } from 'src/shared/components';
+import { Box, Card, WifiProtectedSetup } from 'src/shared/components';
 import { BigNumber, parseUnits } from 'src/shared/helpers/blockchain/numbers';
 
 import {

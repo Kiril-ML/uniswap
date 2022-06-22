@@ -13,7 +13,7 @@ const calculateProportion = ({
   secondToken,
   shouldReverse,
 }: Args) => {
-  if (pair === null) return null;
+  if (pair === null || pair.proportion === 'any') return null;
 
   const isTokensChosen = firstToken.name !== '' && secondToken.name !== '';
   const shouldCalculateProportion = pair !== null && isTokensChosen;

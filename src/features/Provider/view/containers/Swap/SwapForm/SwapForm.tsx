@@ -12,17 +12,23 @@ import {
   Typography,
   InputAdornment,
   ArrowDown,
+  CircularProgress,
 } from 'src/shared/components';
 import { BigNumber, parseUnits } from 'src/shared/helpers/blockchain/numbers';
 import {
   calculateMinOut,
-  calculateSwapOut,
   findCurrentPair,
   shortBalance,
   getPairBalance,
 } from 'src/features/Provider/utils';
 
-import { selectProvider, swapIn } from '../../../../redux/slice';
+import {
+  calculateAmountIn,
+  calculateAmountOut,
+  calculateMaxAmountOut,
+  selectProvider,
+  swapIn,
+} from '../../../../redux/slice';
 import {
   FieldWithAutocomplete,
   Props as FieldWithAutocompleteProps,
@@ -32,7 +38,7 @@ import { SubmitButtonValue } from './types';
 import { createStyles } from './SwapForm.style';
 import { initialState, MAX_SLIPPAGE, MIN_SLIPPAGE } from './constants';
 import { Hint } from './Hint/Hint';
-import { calculateNeighborInputValue, changeButtonText } from './utils';
+import { changeButtonText } from './utils';
 
 type HandleAutocompleteChange =
   FieldWithAutocompleteProps['handleAutocompleteChange'];
@@ -46,7 +52,15 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
   const styles = createStyles(theme);
 
   const dispatch = useAppDispatch();
-  const { data } = useAppSelector(selectProvider);
+  const {
+    data,
+    isCalculatingAmountOut,
+    calculatedAmountOutValue,
+    isCalculatingAmountIn,
+    calculatedAmountInValue,
+    calculatedMaxAmountOutValue,
+    isCalculatingMaxAmountOutValue,
+  } = useAppSelector(selectProvider);
   const { tokens } = data;
 
   const [firstToken, setFirstToken] = useState<Token>(initialState.firstToken);
@@ -103,6 +117,31 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
     secondTokenValue,
   ]);
 
+  const { shouldReverse, currentPair } = findCurrentPair({
+    pairs: data.pairs,
+    firstTokenName: firstToken.name,
+    secondTokenName: secondToken.name,
+  });
+
+  const [pairBalanceIn, pairBalanceOut] = getPairBalance({
+    pair: currentPair,
+    shouldReverse,
+  });
+
+  let maxTokenIn = '0';
+  let maxTokenOut = calculatedMaxAmountOutValue.amountOut;
+
+  if (pairBalanceIn !== null && pairBalanceOut !== null) {
+    maxTokenIn = BigNumber.min(
+      firstToken.userBalance,
+      pairBalanceIn
+    ).toString();
+  }
+
+  if (currentPair === null) {
+    maxTokenOut = '0';
+  }
+
   const handleFirstTokenAutocompleteChange: HandleAutocompleteChange = (
     event,
     value
@@ -137,16 +176,8 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
     setSecondToken(value);
   };
 
-  const { shouldReverse, currentPair } = findCurrentPair({
-    pairs: data.pairs,
-    firstTokenName: firstToken.name,
-    secondTokenName: secondToken.name,
-  });
-
   const handleSubmit = (event: SyntheticEvent) => {
     event.preventDefault();
-
-    // console.log(data);
 
     if (signer !== null && library !== undefined) {
       dispatch(
@@ -176,11 +207,6 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
     }
   };
 
-  const [pairBalanceIn, pairBalanceOut] = getPairBalance({
-    pair: currentPair,
-    shouldReverse,
-  });
-
   const handleFirstTokenValueChange = (
     event: SyntheticEvent<HTMLInputElement>
   ) => {
@@ -195,23 +221,28 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
       return newValue;
     });
 
-    const {
-      newNeighborValue,
-      shouldUpdateNeighborValue,
-      shouldResetNeighborValue,
-    } = calculateNeighborInputValue({
-      data,
-      newValue: event.currentTarget.value,
-      firstToken,
-      pairBalanceIn,
-      pairBalanceOut,
-      secondToken,
-      neighbor: 'second',
-    });
+    const newValue = event.currentTarget.value;
+    const shouldUpdate =
+      currentPair !== null &&
+      library !== undefined &&
+      !Number.isNaN(Number(newValue)) &&
+      newValue !== '' &&
+      +newValue > 0 &&
+      +newValue <= +maxTokenIn;
 
-    if (shouldUpdateNeighborValue) {
-      setSecondTokenValue(newNeighborValue);
-    } else if (shouldResetNeighborValue) {
+    if (shouldUpdate) {
+      dispatch(
+        calculateAmountOut({
+          pairAddress: currentPair.address,
+          tokenInAddress: firstToken.address,
+          tokenOutAddress: secondToken.address,
+          amountIn: parseUnits(newValue, firstToken.decimals),
+          provider: library,
+        })
+      );
+    }
+
+    if (newValue === '0') {
       setSecondTokenValue('');
     }
   };
@@ -230,23 +261,28 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
       return newValue;
     });
 
-    const {
-      newNeighborValue,
-      shouldUpdateNeighborValue,
-      shouldResetNeighborValue,
-    } = calculateNeighborInputValue({
-      data,
-      newValue: event.currentTarget.value,
-      firstToken,
-      pairBalanceIn,
-      pairBalanceOut,
-      secondToken,
-      neighbor: 'first',
-    });
+    const newValue = event.currentTarget.value;
+    const shouldUpdate =
+      currentPair !== null &&
+      library !== undefined &&
+      !Number.isNaN(Number(newValue)) &&
+      newValue !== '' &&
+      +newValue > 0 &&
+      +newValue <= +maxTokenOut;
 
-    if (shouldUpdateNeighborValue) {
-      setFirstTokenValue(Number(newNeighborValue).toFixed(4));
-    } else if (shouldResetNeighborValue) {
+    if (shouldUpdate) {
+      dispatch(
+        calculateAmountIn({
+          pairAddress: currentPair.address,
+          tokenInAddress: firstToken.address,
+          tokenOutAddress: secondToken.address,
+          amountOut: parseUnits(newValue, secondToken.decimals),
+          provider: library,
+        })
+      );
+    }
+
+    if (newValue === '' || newValue === '0') {
       setFirstTokenValue('');
     }
   };
@@ -261,27 +297,6 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
     }
   };
 
-  let maxTokenIn = '0';
-  let maxTokenOut = '0';
-
-  if (pairBalanceIn !== null && pairBalanceOut !== null) {
-    maxTokenIn = BigNumber.min(
-      firstToken.userBalance,
-      pairBalanceIn
-    ).toString();
-
-    maxTokenOut = calculateSwapOut({
-      amountIn: parseUnits(maxTokenIn, firstToken.decimals),
-      balanceIn: parseUnits(pairBalanceIn, firstToken.decimals),
-      balanceOut: parseUnits(pairBalanceOut, secondToken.decimals),
-      fee: {
-        amount: parseUnits(data.fee.value, data.fee.decimals),
-        decimals: data.fee.decimals,
-      },
-      decimals: Math.max(firstToken.decimals, secondToken.decimals),
-    });
-  }
-
   const handelButtonDisabled = (shouldDisabledButton: boolean) => {
     setButtonDisabled(shouldDisabledButton);
   };
@@ -292,19 +307,41 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
     if (isTokensChosen) {
       setFirstTokenValue(maxTokenIn);
 
-      const { newNeighborValue } = calculateNeighborInputValue({
-        data,
-        newValue: maxTokenIn,
-        firstToken,
-        pairBalanceIn,
-        pairBalanceOut,
-        secondToken,
-        neighbor: 'second',
-      });
-
-      setSecondTokenValue(newNeighborValue);
+      if (currentPair !== null && library !== undefined) {
+        dispatch(
+          calculateAmountOut({
+            pairAddress: currentPair.address,
+            tokenInAddress: firstToken.address,
+            tokenOutAddress: secondToken.address,
+            amountIn: parseUnits(maxTokenIn, firstToken.decimals),
+            provider: library,
+          })
+        );
+      }
     }
   };
+
+  useEffect(() => {
+    setFirstTokenValue(calculatedAmountInValue.amountIn);
+  }, [calculatedAmountInValue.amountIn]);
+
+  useEffect(() => {
+    setSecondTokenValue(calculatedAmountOutValue.amountOut);
+  }, [calculatedAmountOutValue.amountOut]);
+  useEffect(() => {
+    if (currentPair !== null && library !== undefined) {
+      dispatch(
+        calculateMaxAmountOut({
+          pairAddress: currentPair.address,
+          tokenInAddress: firstToken.address,
+          tokenOutAddress: secondToken.address,
+          amountIn: parseUnits(maxTokenIn, firstToken.decimals),
+          provider: library,
+        })
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calculatedMaxAmountOutValue.amountOut, currentPair]);
 
   return (
     <Card
@@ -315,49 +352,64 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
             <Box>
               <Typography>Обменять</Typography>
             </Box>
-            <FieldWithAutocomplete
-              inputProps={{
-                value: firstTokenValue,
-                disabled: isShouldDisabled,
-                onChange: handleFirstTokenValueChange,
-              }}
-              balance={shortBalance(firstToken.userBalance)}
-              disabled={isShouldDisabled}
-              handleAutocompleteChange={handleFirstTokenAutocompleteChange}
-              options={tokens.filter(
-                (token) => token.name !== secondToken.name
+            <Box css={styles.inputBox()}>
+              <FieldWithAutocomplete
+                inputProps={{
+                  value: firstTokenValue,
+                  disabled: isShouldDisabled || isCalculatingMaxAmountOutValue,
+                  onChange: handleFirstTokenValueChange,
+                }}
+                balance={shortBalance(firstToken.userBalance)}
+                disabled={isShouldDisabled}
+                handleAutocompleteChange={handleFirstTokenAutocompleteChange}
+                options={tokens.filter(
+                  (token) => token.name !== secondToken.name
+                )}
+                isMaxBtnDisplayed
+                max={shortBalance(maxTokenIn)}
+                handleMaxClick={handleMaxClick}
+                optionsValue={firstToken}
+                isCalculating={isCalculatingAmountIn}
+                css={styles.input()}
+              />
+              {isCalculatingAmountIn && (
+                <CircularProgress css={styles.progress()}></CircularProgress>
               )}
-              isMaxBtnDisplayed
-              max={shortBalance(maxTokenIn)}
-              handleMaxClick={handleMaxClick}
-              optionsValue={firstToken}
-            />
+            </Box>
             <Box css={styles.arrow()}>
               <ArrowDown></ArrowDown>
             </Box>
-            <FieldWithAutocomplete
-              inputProps={{
-                value: secondTokenValue,
-                onChange: handleSecondTokenValueChange,
-                disabled: isShouldDisabled,
-              }}
-              balance={shortBalance(secondToken.userBalance)}
-              options={tokens.filter((token) => token.name !== firstToken.name)}
-              handleAutocompleteChange={handleSecondTokenAutocompleteChange}
-              disabled={isShouldDisabled}
-              max={shortBalance(maxTokenOut)}
-              optionsValue={secondToken}
-            />
+            <Box css={styles.inputBox()}>
+              <FieldWithAutocomplete
+                inputProps={{
+                  value: secondTokenValue,
+                  onChange: handleSecondTokenValueChange,
+                  disabled: isShouldDisabled || isCalculatingMaxAmountOutValue,
+                }}
+                balance={shortBalance(secondToken.userBalance)}
+                options={tokens.filter(
+                  (token) => token.name !== firstToken.name
+                )}
+                handleAutocompleteChange={handleSecondTokenAutocompleteChange}
+                disabled={isShouldDisabled}
+                max={shortBalance(maxTokenOut)}
+                isCalculatingMaxAmountOutValue={isCalculatingMaxAmountOutValue}
+                optionsValue={secondToken}
+                isCalculating={isCalculatingAmountOut}
+                css={styles.input()}
+              />
+              {isCalculatingAmountOut && (
+                <CircularProgress css={styles.progress()}></CircularProgress>
+              )}
+            </Box>
             <Hint
               pair={currentPair}
-              shouldReverse={shouldReverse}
               firstToken={firstToken}
               secondToken={secondToken}
               firstTokenValue={firstTokenValue}
               secondTokenValue={secondTokenValue}
               slippage={+slippage}
               maxTokenIn={maxTokenIn}
-              maxTokenOut={maxTokenOut}
               handelButtonDisabled={handelButtonDisabled}
             ></Hint>
             <Box>

@@ -17,6 +17,16 @@ const createStyles = (theme: Theme) => ({
     justify-content: center;
     margin: ${theme.spacing(5)} 0;
   `,
+  inputBox: () =>
+    css`
+      position: relative;
+    `,
+  input: () => css``,
+  progress: () => css`
+    position: absolute;
+    top: 35%;
+    left: 5%;
+  `,
 });
 
 export { createStyles };

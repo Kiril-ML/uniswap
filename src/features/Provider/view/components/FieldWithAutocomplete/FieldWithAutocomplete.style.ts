@@ -28,6 +28,15 @@ const createStyles = (theme: Theme) => ({
       line-clamp: 1;
     `,
   addMaxBtn: () => css``,
+  maxValueBox: () => css`
+    position: relative;
+  `,
+  progress: () =>
+    css`
+      position: absolute;
+      max-width: ${theme.typography.pxToRem(22)};
+      max-height: ${theme.typography.pxToRem(22)};
+    `,
 });
 
 export { createStyles };

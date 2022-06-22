@@ -6,6 +6,7 @@ import {
   Avatar,
   Box,
   Button,
+  CircularProgress,
   InputAdornment,
   TextField,
   Typography,
@@ -25,6 +26,8 @@ type Props = NumberInputProps & {
   optionsValue: Token;
   isMaxBtnDisplayed?: boolean;
   disabled?: boolean;
+  isCalculating?: boolean;
+  isCalculatingMaxAmountOutValue?: boolean;
   handleAutocompleteChange: (
     event: SyntheticEvent<Element, Event>,
     value: Token | null | string | (string | Token)[],
@@ -40,6 +43,8 @@ const FieldWithAutocomplete: FC<Props> = ({
   optionsValue,
   isMaxBtnDisplayed = false,
   disabled = false,
+  isCalculating = false,
+  isCalculatingMaxAmountOutValue = false,
   handleMaxClick,
   handleAutocompleteChange,
   ...maskedDecimalFieldProps
@@ -50,6 +55,7 @@ const FieldWithAutocomplete: FC<Props> = ({
   return (
     <NumberInput
       css={styles.root()}
+      isCalculating={isCalculating}
       variant="filled"
       {...maskedDecimalFieldProps}
       InputProps={{
@@ -108,19 +114,34 @@ const FieldWithAutocomplete: FC<Props> = ({
               <Typography
                 css={styles.captionBalance()}
                 variant="caption"
-                title={balance ?? '0'}
+                title={balance}
                 noWrap
               >
-                Баланс: {balance ?? '0'}
+                Баланс: {balance}
               </Typography>
-              <Typography
-                css={styles.captionBalance()}
-                variant="caption"
-                title={max ?? '0'}
-                noWrap
-              >
-                макс: {max ?? '0'}
-              </Typography>
+              {isCalculatingMaxAmountOutValue ? (
+                <Box css={styles.maxValueBox()}>
+                  <Typography
+                    css={styles.captionBalance()}
+                    variant="caption"
+                    title={'loading'}
+                    noWrap
+                  >
+                    макс:
+                  </Typography>
+                  <CircularProgress css={styles.progress()}></CircularProgress>
+                </Box>
+              ) : (
+                <Typography
+                  css={styles.captionBalance()}
+                  variant="caption"
+                  title={max}
+                  noWrap
+                >
+                  макс: {max}
+                </Typography>
+              )}
+
               {isMaxBtnDisplayed && (
                 <Button
                   css={styles.addMaxBtn()}

@@ -15,7 +15,7 @@ const initialState = {
     decimals: 18,
     image: '',
   },
-  slippage: 0.5,
+  slippage: 2,
 };
 
 const MAX_SLIPPAGE = 50;

@@ -4,6 +4,23 @@ type State = {
   status: RequestStatus;
   error: string | null;
   data: Data;
+  isCalculatingAmountIn: boolean;
+  isCalculatingAmountOut: boolean;
+  isCalculatingMaxAmountOutValue: boolean;
+  calculatedAmountInValue: {
+    amountIn: string;
+    tokenInFee: string;
+    decimals: number;
+  };
+  calculatedAmountOutValue: {
+    amountOut: string;
+    tokenOutFee: string;
+    decimals: number;
+  };
+  calculatedMaxAmountOutValue: {
+    amountOut: string;
+    decimals: number;
+  };
 };
 
 type Data = {

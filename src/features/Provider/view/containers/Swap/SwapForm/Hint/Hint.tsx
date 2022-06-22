@@ -3,8 +3,10 @@ import { useTheme } from '@mui/material';
 
 import { Pair, Token } from 'src/features/Provider/types';
 import { calculateMinOut } from 'src/features/Provider/utils';
-import { Box, Typography } from 'src/shared/components';
+import { Box, CircularProgress, Typography } from 'src/shared/components';
 import { BigNumber } from 'src/shared/helpers/blockchain/numbers';
+import { useAppSelector } from 'src/app/hooks';
+import { selectProvider } from 'src/features/Provider/redux/selectors';
 
 import { createStyles } from './Hint.style';
 
@@ -15,9 +17,7 @@ type Props = {
   firstTokenValue: string;
   secondTokenValue: string;
   slippage: number;
-  shouldReverse: boolean;
   maxTokenIn: string;
-  maxTokenOut: string;
   handelButtonDisabled: (shouldDisabledButton: boolean) => void;
 };
 
@@ -28,22 +28,33 @@ const Hint: FC<Props> = ({
   firstTokenValue,
   secondTokenValue,
   slippage,
-  shouldReverse,
   maxTokenIn,
-  maxTokenOut,
   handelButtonDisabled,
 }) => {
   const theme = useTheme();
   const styles = createStyles(theme);
 
-  let proportionHint = '';
+  const {
+    isCalculatingAmountOut,
+    isCalculatingAmountIn,
+    isCalculatingMaxAmountOutValue,
+    calculatedMaxAmountOutValue,
+    calculatedAmountOutValue,
+  } = useAppSelector(selectProvider);
+
   let commissionHint = '';
   let slippageHint = '';
+
+  const isCalculating =
+    isCalculatingAmountOut ||
+    isCalculatingAmountIn ||
+    isCalculatingMaxAmountOutValue;
 
   const isTokensChosen = firstToken.name !== '' && secondToken.name !== '';
   const isValueBiggerMax =
     isTokensChosen &&
-    (+maxTokenIn < +firstTokenValue || +maxTokenOut < +secondTokenValue);
+    (+maxTokenIn < +firstTokenValue ||
+      +calculatedMaxAmountOutValue.amountOut < +secondTokenValue);
 
   handelButtonDisabled(isValueBiggerMax);
 
@@ -55,37 +66,18 @@ const Hint: FC<Props> = ({
     (new BigNumber(firstToken.userBalance).decimalPlaces(5).lt('0.00001') ||
       new BigNumber(secondToken.userBalance).decimalPlaces(5).lt('0.00001'));
 
-  const shouldCalculateProportion =
-    pair !== null &&
+  const shouldCalculateCommission =
     isTokensChosen &&
     !isInsufficientLiquidity &&
     !isInsufficientUserBalance &&
-    isPairExist;
-
-  if (shouldCalculateProportion) {
-    const proportion = shouldReverse ? 1 / +pair.proportion : pair.proportion;
-    const swapOutValue = new BigNumber('1').dividedBy(proportion).toFixed(5);
-    proportionHint = `1 ${firstToken.name} = ${new BigNumber(swapOutValue)
-      .decimalPlaces(5)
-      .toString()} ${secondToken.name}`;
-  }
-
-  const shouldCalculateCommission =
-    shouldCalculateProportion &&
+    isPairExist &&
     firstTokenValue !== '' &&
     secondTokenValue !== '';
 
   if (shouldCalculateCommission) {
-    const proportion =
-      +pair.proportion > 1
-        ? new BigNumber('1').div(pair.proportion).toString()
-        : pair.proportion;
-
-    commissionHint = `комиссия: ${new BigNumber(secondTokenValue)
-      .minus(new BigNumber(firstTokenValue).times(proportion))
-      .abs()
-      .decimalPlaces(5)
-      .toString()} ${secondToken.name}`;
+    commissionHint = `комиссия: ${new BigNumber(
+      calculatedAmountOutValue.tokenOutFee
+    ).toFixed(6)} ${secondToken.name}`;
 
     slippageHint = `минимально получите: ${new BigNumber(
       calculateMinOut({
@@ -94,40 +86,44 @@ const Hint: FC<Props> = ({
         decimals: secondToken.decimals,
       })
     )
-      .decimalPlaces(5)
+      .decimalPlaces(6)
       .toString()} ${secondToken.name}`;
   }
 
   return (
     <Box css={styles.root()}>
-      {isInsufficientLiquidity && (
-        <Typography css={styles.insufficientAmount()} color="error">
-          Недостаточно ликвидности
-        </Typography>
-      )}
-      {isValueBiggerMax && (
-        <Typography css={styles.insufficientAmount()} color="error">
-          Неверное количество
-        </Typography>
-      )}
-      {!isPairExist && (
-        <Typography css={styles.insufficientAmount()} color="error">
-          Выбранная пара не найдена в пуле ликвидности
-        </Typography>
-      )}
-      {isInsufficientUserBalance && (
-        <Typography css={styles.insufficientAmount()} color="error">
-          Недостаточно средств
-        </Typography>
-      )}
-      {shouldCalculateProportion && (
-        <Typography css={styles.caption()}>{proportionHint}</Typography>
-      )}
-      {shouldCalculateCommission && !isValueBiggerMax && (
-        <Typography css={styles.caption()}>{commissionHint}</Typography>
-      )}
-      {shouldCalculateCommission && !isValueBiggerMax && (
-        <Typography css={styles.caption()}>{slippageHint}</Typography>
+      {isCalculating ? (
+        <CircularProgress></CircularProgress>
+      ) : (
+        <>
+          {isInsufficientLiquidity && (
+            <Typography css={styles.insufficientAmount()} color="error">
+              Недостаточно ликвидности
+            </Typography>
+          )}
+          {isValueBiggerMax && (
+            <Typography css={styles.insufficientAmount()} color="error">
+              Неверное количество
+            </Typography>
+          )}
+          {!isPairExist && (
+            <Typography css={styles.insufficientAmount()} color="error">
+              Выбранная пара не найдена в пуле ликвидности
+            </Typography>
+          )}
+          {isInsufficientUserBalance && (
+            <Typography css={styles.insufficientAmount()} color="error">
+              Недостаточно средств
+            </Typography>
+          )}
+
+          {shouldCalculateCommission && !isValueBiggerMax && (
+            <Typography css={styles.caption()}>{commissionHint}</Typography>
+          )}
+          {shouldCalculateCommission && !isValueBiggerMax && (
+            <Typography css={styles.caption()}>{slippageHint}</Typography>
+          )}
+        </>
       )}
     </Box>
   );

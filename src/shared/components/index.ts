@@ -11,6 +11,7 @@ import {
   LabelIcon,
   ArrowDown,
   Logout,
+  WifiProtectedSetup,
 } from './Icon';
 import { IconButton } from './IconButton/IconButton';
 import { LazyContainer } from './LazyContainer/LazyContainer';
@@ -46,6 +47,7 @@ export {
   LazyContainer,
   Link,
   Menu,
+  WifiProtectedSetup,
   PageHead,
   TextField,
   Typography,
