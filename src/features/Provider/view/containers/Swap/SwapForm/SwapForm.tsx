@@ -143,7 +143,7 @@ const SwapForm: FC<Props> = ({
     ).toString();
   }
 
-  if (currentPair === null) {
+  if (currentPair === null || maxTokenIn === '0') {
     maxTokenOut = '0';
   }
 
