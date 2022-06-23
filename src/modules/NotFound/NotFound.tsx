@@ -7,7 +7,7 @@ const NotFound: NextPageWithLayout = () => {
 
   return (
     <>
-      <PageHead title="Интегратор - страница не найдена" />
+      <PageHead title="Uniswap - страница не найдена" />
       <Typography variant="body1" color="initial">
         Страница не найдена, перенаправление на главную страницу через{' '}
         {redirectTimeout} секунд...
