@@ -11,8 +11,8 @@ const PageHead: FC<Props> = (props) => {
   const {
     title,
     children,
-    keywords = 'MetaLamp, Trello, Google sheets, API, visualization',
-    description = 'Visualizer of API of Trello and Google sheets',
+    keywords = 'MetaLamp, uniswap, clone, education',
+    description = 'Clone of uniswap for education purpose.',
   } = props;
 
   return Head({

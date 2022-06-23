@@ -12,13 +12,28 @@ const createStyles = (props: {}, theme: Theme) => ({
   toolbar: () => css`
     display: grid;
     grid-template-columns: ${theme.spacing(230)} 1fr ${theme.spacing(230)};
+    grid-template-areas: 'logo navigation wallet';
+
+    @media (max-width: ${theme.breakpoints.values.sm}px) {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr 1fr 1fr;
+      grid-template-areas:
+        'logo'
+        'navigation'
+        'wallet';
+      justify-items: center;
+    }
   `,
-  logo: () => css``,
+  logo: () => css`
+    grid-area: logo;
+  `,
   userWallet: () => css`
     line-height: ${theme.typography.pxToRem(26)};
     font-weight: ${theme.typography.h5.fontWeight};
+    grid-area: wallet;
   `,
   navigation: () => css`
+    grid-area: navigation;
     justify-self: center;
   `,
 });

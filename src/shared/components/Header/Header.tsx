@@ -20,7 +20,7 @@ type Props = MUIHeaderProps & {
 
 const Header: FC<Props> = ({
   navigation = { items: defaultNavigationItems },
-  userWallet = undefined,
+  userWallet = null,
   ...MUIProps
 }) => {
   const theme = useTheme();

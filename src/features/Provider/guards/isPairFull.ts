@@ -5,7 +5,9 @@ const isPairFull = (pair: Partial<Pair>): pair is Pair => {
     pair.address !== undefined &&
     pair.userBalance !== undefined &&
     pair.decimals !== undefined &&
-    pair.proportion !== undefined;
+    pair.proportion !== undefined &&
+    pair.pairNames !== undefined &&
+    pair.pairSymbol !== undefined;
 
   return isFull;
 };
