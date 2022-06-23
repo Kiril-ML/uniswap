@@ -205,7 +205,6 @@ const SwapForm: FC<Props> = ({
       ).then(() => {
         handleShowAlertClick();
         setActiveTransaction(false);
-        dispatch(setShouldUpdateData());
       });
 
       setFirstTokenValue('');
@@ -215,6 +214,10 @@ const SwapForm: FC<Props> = ({
       handleCloseAlertClick();
       setActiveTransaction(true);
     }
+  };
+
+  const handleAutocompleteFocus = () => {
+    dispatch(setShouldUpdateData());
   };
 
   const handleFirstTokenValueChange = (
@@ -395,6 +398,7 @@ const SwapForm: FC<Props> = ({
                 optionsValue={firstToken}
                 isCalculating={isCalculatingAmountIn}
                 css={styles.input()}
+                handleAutocompleteFocus={handleAutocompleteFocus}
               />
               {isCalculatingAmountIn && (
                 <CircularProgress css={styles.progress()}></CircularProgress>
@@ -421,6 +425,7 @@ const SwapForm: FC<Props> = ({
                 optionsValue={secondToken}
                 isCalculating={isCalculatingAmountOut}
                 css={styles.input()}
+                handleAutocompleteFocus={handleAutocompleteFocus}
               />
               {isCalculatingAmountOut && (
                 <CircularProgress css={styles.progress()}></CircularProgress>

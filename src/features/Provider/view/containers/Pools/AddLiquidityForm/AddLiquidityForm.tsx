@@ -244,7 +244,6 @@ const AddLiquidityForm: FC<Props> = ({
         })
       ).then(() => {
         handleShowAlertClick();
-        dispatch(setShouldUpdateData());
         setActiveTransaction(false);
       });
 
@@ -264,6 +263,10 @@ const AddLiquidityForm: FC<Props> = ({
       setFirstTokenValue(maxFirstToken);
       setSecondTokenValue(maxSecondToken);
     }
+  };
+
+  const handleAutocompleteFocus = () => {
+    dispatch(setShouldUpdateData());
   };
 
   return (
@@ -300,6 +303,7 @@ const AddLiquidityForm: FC<Props> = ({
               max={shortBalance(maxFirstToken)}
               optionsValue={firstToken}
               handleMaxClick={handleMaxClick}
+              handleAutocompleteFocus={handleAutocompleteFocus}
             />
             <Box css={styles.arrow()}>+</Box>
             <FieldWithAutocomplete
@@ -315,6 +319,7 @@ const AddLiquidityForm: FC<Props> = ({
               max={shortBalance(maxSecondToken)}
               optionsValue={secondToken}
               isMaxBtnDisplayed
+              handleAutocompleteFocus={handleAutocompleteFocus}
               handleMaxClick={handleMaxClick}
             />
             <Hint

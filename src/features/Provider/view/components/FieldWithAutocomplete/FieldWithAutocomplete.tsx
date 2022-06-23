@@ -34,6 +34,7 @@ type Props = NumberInputProps & {
     reason: 'createOption' | 'selectOption' | 'removeOption' | 'blur' | 'clear'
   ) => void;
   handleMaxClick?: () => void;
+  handleAutocompleteFocus: () => void;
 };
 
 const FieldWithAutocomplete: FC<Props> = ({
@@ -47,6 +48,7 @@ const FieldWithAutocomplete: FC<Props> = ({
   isCalculatingMaxAmountOutValue = false,
   handleMaxClick,
   handleAutocompleteChange,
+  handleAutocompleteFocus,
   ...maskedDecimalFieldProps
 }) => {
   const theme = useTheme();
@@ -104,11 +106,12 @@ const FieldWithAutocomplete: FC<Props> = ({
                   label="токен"
                   size="small"
                   fullWidth
+                  disabled={disabled}
                 />
               )}
               fullWidth
-              disabled={disabled}
               onChange={handleAutocompleteChange}
+              onFocus={handleAutocompleteFocus}
             />
             <Box css={styles.caption()}>
               <Typography
