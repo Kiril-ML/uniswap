@@ -27,7 +27,6 @@ import {
   calculateAmountOut,
   calculateMaxAmountOut,
   selectProvider,
-  setShouldUpdateData,
   swapIn,
 } from '../../../../redux/slice';
 import {
@@ -216,10 +215,6 @@ const SwapForm: FC<Props> = ({
     }
   };
 
-  const handleAutocompleteFocus = () => {
-    dispatch(setShouldUpdateData());
-  };
-
   const handleFirstTokenValueChange = (
     event: SyntheticEvent<HTMLInputElement>
   ) => {
@@ -316,12 +311,8 @@ const SwapForm: FC<Props> = ({
 
   const handleMaxClick = () => {
     const isTokensChosen = firstToken.name !== '' && secondToken.name !== '';
-    const isValueNotZro =
-      firstTokenValue !== '' &&
-      secondTokenValue !== '' &&
-      firstTokenValue !== '0' &&
-      secondTokenValue !== '0';
-    const shouldCalculate = isTokensChosen && isValueNotZro;
+    const isValueNotZero = maxTokenIn !== '0';
+    const shouldCalculate = isTokensChosen && isValueNotZero;
 
     if (shouldCalculate) {
       setFirstTokenValue(maxTokenIn);
@@ -339,6 +330,24 @@ const SwapForm: FC<Props> = ({
       }
     }
   };
+
+  useEffect(() => {
+    if (firstToken.address !== '') {
+      const actualFirstToken = tokens.filter(
+        (token) => token.address === firstToken.address
+      );
+
+      setFirstToken(actualFirstToken[0]);
+    }
+
+    if (secondToken.address !== '') {
+      const actualSecondToken = tokens.filter(
+        (token) => token.address === secondToken.address
+      );
+
+      setSecondToken(actualSecondToken[0]);
+    }
+  }, [tokens]);
 
   useEffect(() => {
     if (currentPair !== null) {
@@ -398,7 +407,6 @@ const SwapForm: FC<Props> = ({
                 optionsValue={firstToken}
                 isCalculating={isCalculatingAmountIn}
                 css={styles.input()}
-                handleAutocompleteFocus={handleAutocompleteFocus}
               />
               {isCalculatingAmountIn && (
                 <CircularProgress css={styles.progress()}></CircularProgress>
@@ -425,7 +433,6 @@ const SwapForm: FC<Props> = ({
                 optionsValue={secondToken}
                 isCalculating={isCalculatingAmountOut}
                 css={styles.input()}
-                handleAutocompleteFocus={handleAutocompleteFocus}
               />
               {isCalculatingAmountOut && (
                 <CircularProgress css={styles.progress()}></CircularProgress>

@@ -7,7 +7,6 @@ type State = {
   isCalculatingAmountIn: boolean;
   isCalculatingAmountOut: boolean;
   isCalculatingMaxAmountOutValue: boolean;
-  shouldUpdateData: boolean;
   calculatedAmountInValue: {
     amountIn: string;
     tokenInFee: string;

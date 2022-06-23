@@ -16,21 +16,12 @@ import { selectProvider } from './selectors';
 const slice = createSlice({
   name: 'Provider',
   initialState,
-  reducers: {
-    setShouldUpdateData(state) {
-      state.shouldUpdateData = true;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(getData.pending, (state) => {
-        state.status = 'pending';
-      })
       .addCase(getData.fulfilled, (state, action) => {
         const { payload } = action;
 
-        state.status = 'fulfilled';
-        state.shouldUpdateData = false;
         state.data = defaults(payload, initialState.data);
       })
       .addCase(getData.rejected, (state, action) => {
@@ -118,7 +109,6 @@ const slice = createSlice({
   },
 });
 
-const { setShouldUpdateData } = slice.actions;
 const { reducer } = slice;
 
 export {
@@ -131,5 +121,4 @@ export {
   calculateAmountOut,
   calculateMaxAmountOut,
   removeLiquidity,
-  setShouldUpdateData,
 };

@@ -12,7 +12,6 @@ import {
 
 import { useAppDispatch, useAppSelector } from 'src/app/hooks';
 import { selectProvider } from 'src/features/Provider/redux/selectors';
-import { setShouldUpdateData } from 'src/features/Provider/redux/slice';
 import { addLiquidity } from 'src/features/Provider/redux/thunks';
 import { Token } from 'src/features/Provider/types';
 import { findCurrentPair, shortBalance } from 'src/features/Provider/utils';
@@ -265,9 +264,23 @@ const AddLiquidityForm: FC<Props> = ({
     }
   };
 
-  const handleAutocompleteFocus = () => {
-    dispatch(setShouldUpdateData());
-  };
+  useEffect(() => {
+    if (firstToken.address !== '') {
+      const actualFirstToken = tokens.filter(
+        (token) => token.address === firstToken.address
+      );
+
+      setFirstToken(actualFirstToken[0]);
+    }
+
+    if (secondToken.address !== '') {
+      const actualSecondToken = tokens.filter(
+        (token) => token.address === secondToken.address
+      );
+
+      setSecondToken(actualSecondToken[0]);
+    }
+  }, [tokens]);
 
   return (
     <Card
@@ -303,7 +316,6 @@ const AddLiquidityForm: FC<Props> = ({
               max={shortBalance(maxFirstToken)}
               optionsValue={firstToken}
               handleMaxClick={handleMaxClick}
-              handleAutocompleteFocus={handleAutocompleteFocus}
             />
             <Box css={styles.arrow()}>+</Box>
             <FieldWithAutocomplete
@@ -319,7 +331,6 @@ const AddLiquidityForm: FC<Props> = ({
               max={shortBalance(maxSecondToken)}
               optionsValue={secondToken}
               isMaxBtnDisplayed
-              handleAutocompleteFocus={handleAutocompleteFocus}
               handleMaxClick={handleMaxClick}
             />
             <Hint

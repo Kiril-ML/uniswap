@@ -4,7 +4,6 @@ import { Dispatch, FC, SetStateAction, useState } from 'react';
 
 import { useAppSelector, useAppDispatch } from 'src/app/hooks';
 import { selectProvider } from 'src/features/Provider/redux/selectors';
-import { setShouldUpdateData } from 'src/features/Provider/redux/slice';
 import { removeLiquidity } from 'src/features/Provider/redux/thunks';
 import {
   Box,
@@ -71,7 +70,6 @@ const RemoveLiquidityForm: FC<Props> = ({
           signer,
         })
       ).then(() => {
-        dispatch(setShouldUpdateData());
         setActiveTransaction(false);
         handleShowAlertClick();
       });
