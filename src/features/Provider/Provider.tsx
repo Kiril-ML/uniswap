@@ -13,11 +13,14 @@ type Props = {
 };
 
 const Provider: FC<Props> = ({ view }) => {
-  const { status, error } = useAppSelector(selectProvider);
+  const { status, error, data } = useAppSelector(selectProvider);
   const dispatch = useAppDispatch();
 
   const { account, library } = useEthers();
   const currentBlock = useBlockNumber();
+
+  // console.log(data, 'data');
+  // console.log(currentBlock, 'currentBlock');
 
   useEffect(() => {
     const isAuth = library !== undefined && account !== undefined;

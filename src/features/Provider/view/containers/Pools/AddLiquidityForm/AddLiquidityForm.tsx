@@ -245,6 +245,15 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
     }
   };
 
+  const handleMaxClick = () => {
+    const isTokensChosen = firstToken.name !== '' && secondToken.name !== '';
+
+    if (isTokensChosen) {
+      setFirstTokenValue(maxFirstToken);
+      setSecondTokenValue(maxSecondToken);
+    }
+  };
+
   return (
     <Card
       css={styles.root()}
@@ -278,6 +287,7 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
               isMaxBtnDisplayed
               max={shortBalance(maxFirstToken)}
               optionsValue={firstToken}
+              handleMaxClick={handleMaxClick}
             />
             <Box css={styles.arrow()}>+</Box>
             <FieldWithAutocomplete
@@ -293,6 +303,7 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
               max={shortBalance(maxSecondToken)}
               optionsValue={secondToken}
               isMaxBtnDisplayed
+              handleMaxClick={handleMaxClick}
             />
             <Hint
               pair={currentPair}

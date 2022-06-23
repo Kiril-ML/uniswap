@@ -65,13 +65,12 @@ const Hint: FC<Props> = ({
         break;
       }
       default: {
+        const proportionBigNumber = new BigNumber(pair.proportion);
         const proportion = shouldReverse
-          ? 1 / +pair.proportion
-          : pair.proportion;
+          ? new BigNumber(1).div(proportionBigNumber).toFixed(6)
+          : proportionBigNumber.toFixed(6);
 
-        proportionHint = `Пропорция: ${new BigNumber(proportion)
-          .decimalPlaces(5)
-          .toString()}`;
+        proportionHint = `Пропорция: ${proportion}`;
 
         break;
       }

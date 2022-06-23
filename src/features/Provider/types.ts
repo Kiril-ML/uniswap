@@ -45,6 +45,8 @@ type Pair = {
   address: string;
   userBalance: string;
   decimals: number;
+  pairNames: string;
+  pairSymbol: string;
 };
 
 type Fee = {

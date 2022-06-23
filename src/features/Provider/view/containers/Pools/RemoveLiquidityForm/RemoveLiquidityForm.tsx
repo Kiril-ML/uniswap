@@ -2,8 +2,9 @@ import { useTheme } from '@mui/material';
 import { useEthers } from '@usedapp/core';
 import { Dispatch, FC, SetStateAction, useState } from 'react';
 
-import { useAppSelector } from 'src/app/hooks';
+import { useAppSelector, useAppDispatch } from 'src/app/hooks';
 import { selectProvider } from 'src/features/Provider/redux/selectors';
+import { removeLiquidity } from 'src/features/Provider/redux/thunks';
 import {
   Box,
   Button,
@@ -13,9 +14,10 @@ import {
 } from 'src/shared/components';
 import { BigNumber } from 'src/shared/helpers/blockchain/numbers';
 
-import { NumberInput } from '../../../components/NumberInput/NumberInput';
+import { PairForm, Props as PairFormProps } from './PairForm/PairForm';
 import { createStyles } from './RemoveLiquidityForm.style';
 
+type HandleClickButton = PairFormProps['handleClickButton'];
 type Props = {
   isLoading: boolean;
   handleChangeForm: Dispatch<
@@ -29,6 +31,7 @@ const RemoveLiquidityForm: FC<Props> = ({ isLoading, handleChangeForm }) => {
 
   const { data } = useAppSelector(selectProvider);
   const { pairs } = data;
+  const dispatch = useAppDispatch();
 
   const [activeTransaction, setActiveTransaction] = useState(false);
 
@@ -36,15 +39,32 @@ const RemoveLiquidityForm: FC<Props> = ({ isLoading, handleChangeForm }) => {
     (pair) => !new BigNumber(pair.userBalance).isZero()
   );
 
-  // console.log(userPairs, 'userPairs');
-  // console.log(pairs, 'pairs');
-
-  const { account } = useEthers();
+  const { account, library } = useEthers();
   const isShouldDisabled =
     account === undefined || isLoading || activeTransaction;
 
   const onClickChangeForm = () => {
     handleChangeForm('AddLiquidity');
+  };
+
+  const handleClickButton: HandleClickButton = ({
+    token0Address,
+    token1Address,
+    amountLP,
+  }) => {
+    if (library !== undefined) {
+      const signer = library.getSigner();
+      dispatch(
+        removeLiquidity({
+          token0Address,
+          token1Address,
+          amountLP,
+          signer,
+        })
+      ).then(() => setActiveTransaction(false));
+
+      setActiveTransaction(true);
+    }
   };
 
   return (
@@ -70,29 +90,12 @@ const RemoveLiquidityForm: FC<Props> = ({ isLoading, handleChangeForm }) => {
                 <Typography align="center">У вас пока нет пар</Typography>
               ) : (
                 userPairs.map((pair) => (
-                  <Box
-                    css={styles.pair()}
-                    key={pair.tokens.map(({ symbol }) => symbol).toString()}
-                  >
-                    <Typography css={styles.pairTitle()}>
-                      {`${pair.tokens.map(({ symbol }) => symbol).join(' + ')}`}
-                    </Typography>
-                    <NumberInput
-                      inputProps={{
-                        disableUnderline: true,
-                        disabled: isShouldDisabled,
-                      }}
-                    ></NumberInput>
-                    <Button
-                      type="submit"
-                      css={styles.button()}
-                      variant="contained"
-                      fullWidth
-                      disabled={isShouldDisabled}
-                    >
-                      ВЫВЕСТИ
-                    </Button>
-                  </Box>
+                  <PairForm
+                    key={pair.address}
+                    pair={pair}
+                    isShouldDisabled={isShouldDisabled}
+                    handleClickButton={handleClickButton}
+                  ></PairForm>
                 ))
               )}
             </Box>

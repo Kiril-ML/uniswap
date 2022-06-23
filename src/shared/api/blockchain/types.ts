@@ -131,7 +131,7 @@ type ERC20PairReadAPI = {
   getReserve(index: ethers.BigNumber): ethers.BigNumber;
   name(): string;
   owner(): Address;
-  reserves(index: ethers.BigNumber): ethers.BigNumber;
+  reserves(index: 0 | 1): ethers.BigNumber;
   router(): Address;
   symbol(): Address;
   totalSupply(): ethers.BigNumber;

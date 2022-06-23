@@ -8,6 +8,7 @@ import {
   calculateAmountOut,
   calculateMaxAmountOut,
   getData,
+  removeLiquidity,
   swapIn,
 } from './thunks';
 import { selectProvider } from './selectors';
@@ -15,11 +16,7 @@ import { selectProvider } from './selectors';
 const slice = createSlice({
   name: 'Provider',
   initialState,
-  reducers: {
-    setFeeValue(state, { payload }) {
-      state.data.fee.value = payload;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(getData.fulfilled, (state, action) => {
@@ -99,11 +96,19 @@ const slice = createSlice({
       .addCase(calculateMaxAmountOut.rejected, (state, action) => {
         state.status = 'rejected';
         state.error = action.error.message ?? '';
+      })
+      .addCase(removeLiquidity.pending, (state) => {
+        state.status = 'pending';
+      })
+      .addCase(removeLiquidity.fulfilled, (state) => {
+        state.status = 'fulfilled';
+      })
+      .addCase(removeLiquidity.rejected, (state, action) => {
+        state.status = 'rejected';
+        state.error = action.error.message ?? '';
       });
   },
 });
-
-const { setFeeValue } = slice.actions;
 
 const { reducer } = slice;
 
@@ -113,8 +118,8 @@ export {
   getData,
   swapIn,
   addLiquidity,
-  setFeeValue,
   calculateAmountIn,
   calculateAmountOut,
   calculateMaxAmountOut,
+  removeLiquidity,
 };

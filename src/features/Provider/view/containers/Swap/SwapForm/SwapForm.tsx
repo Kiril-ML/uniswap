@@ -303,8 +303,14 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
 
   const handleMaxClick = () => {
     const isTokensChosen = firstToken.name !== '' && secondToken.name !== '';
+    const isValueNotZro =
+      firstTokenValue !== '' &&
+      secondTokenValue !== '' &&
+      firstTokenValue !== '0' &&
+      secondTokenValue !== '0';
+    const shouldCalculate = isTokensChosen && isValueNotZro;
 
-    if (isTokensChosen) {
+    if (shouldCalculate) {
       setFirstTokenValue(maxTokenIn);
 
       if (currentPair !== null && library !== undefined) {
@@ -322,14 +328,23 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
   };
 
   useEffect(() => {
-    setFirstTokenValue(calculatedAmountInValue.amountIn);
+    if (currentPair !== null) {
+      setFirstTokenValue(calculatedAmountInValue.amountIn);
+    }
   }, [calculatedAmountInValue.amountIn]);
 
   useEffect(() => {
-    setSecondTokenValue(calculatedAmountOutValue.amountOut);
+    if (currentPair !== null) {
+      setSecondTokenValue(calculatedAmountOutValue.amountOut);
+    }
   }, [calculatedAmountOutValue.amountOut]);
+
   useEffect(() => {
-    if (currentPair !== null && library !== undefined) {
+    const isValueZero = new BigNumber(maxTokenIn).isZero();
+    const shouldCalculate =
+      currentPair !== null && library !== undefined && !isValueZero;
+
+    if (shouldCalculate) {
       dispatch(
         calculateMaxAmountOut({
           pairAddress: currentPair.address,
@@ -340,8 +355,7 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
         })
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [calculatedMaxAmountOutValue.amountOut, currentPair]);
+  }, [calculatedMaxAmountOutValue.amountOut]);
 
   return (
     <Card

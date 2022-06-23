@@ -51,6 +51,14 @@ const Hint: FC<Props> = ({
     isCalculatingMaxAmountOutValue;
 
   const isTokensChosen = firstToken.name !== '' && secondToken.name !== '';
+  const isValueChosen =
+    firstTokenValue !== '' &&
+    secondTokenValue !== '' &&
+    firstTokenValue !== '0' &&
+    secondTokenValue !== '0';
+
+  const shouldShowProgress = isCalculating && isValueChosen;
+
   const isValueBiggerMax =
     isTokensChosen &&
     (+maxTokenIn < +firstTokenValue ||
@@ -71,8 +79,7 @@ const Hint: FC<Props> = ({
     !isInsufficientLiquidity &&
     !isInsufficientUserBalance &&
     isPairExist &&
-    firstTokenValue !== '' &&
-    secondTokenValue !== '';
+    isValueChosen;
 
   if (shouldCalculateCommission) {
     commissionHint = `комиссия: ${new BigNumber(
@@ -92,7 +99,7 @@ const Hint: FC<Props> = ({
 
   return (
     <Box css={styles.root()}>
-      {isCalculating ? (
+      {shouldShowProgress ? (
         <CircularProgress></CircularProgress>
       ) : (
         <>

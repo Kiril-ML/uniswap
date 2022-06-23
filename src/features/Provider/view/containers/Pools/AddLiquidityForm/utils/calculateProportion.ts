@@ -1,4 +1,5 @@
 import { Pair, Token } from 'src/features/Provider/types';
+import { BigNumber } from 'src/shared/helpers/blockchain/numbers';
 
 type Args = {
   pair: Pair | null;
@@ -20,9 +21,12 @@ const calculateProportion = ({
 
   if (!shouldCalculateProportion) return null;
 
-  const proportion = shouldReverse ? 1 / +pair.proportion : pair.proportion;
+  const proportionBigNumber = new BigNumber(pair.proportion);
+  const proportion = shouldReverse
+    ? new BigNumber(1).div(proportionBigNumber).toString()
+    : proportionBigNumber.toString();
 
-  return typeof proportion === 'number' ? proportion.toString() : proportion;
+  return proportion;
 };
 
 export { calculateProportion };

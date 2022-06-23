@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 
 import { fetchReadFromERC20 } from 'src/shared/api/blockchain/rinkeby/fetches/readFromERC20';
+import { fetchReadFromERC20Pair } from 'src/shared/api/blockchain/rinkeby/fetches/readFromERC20Pair';
 import { fetchReadFromRegistry } from 'src/shared/api/blockchain/rinkeby/fetches/readFromRegistry';
 import { Address } from 'src/shared/api/blockchain/types';
 import { BigNumber, formatUnits } from 'src/shared/helpers/blockchain/numbers';
@@ -40,9 +41,21 @@ const getPairs = async ({
         return null;
       }
 
-      const pair = await fetchReadFromERC20({
+      const userPair = await fetchReadFromERC20({
         contractParameters: { address: pairAddress, provider },
         methods: { balanceOf: [userAddress], decimals: [] },
+      });
+
+      if (isError(userPair)) {
+        return userPair;
+      }
+
+      const pair = await fetchReadFromERC20Pair({
+        contractParameters: { address: pairAddress, provider },
+        methods: {
+          name: [],
+          symbol: [],
+        },
       });
 
       if (isError(pair)) {
@@ -67,7 +80,7 @@ const getPairs = async ({
         return pairToken1;
       }
 
-      const { balanceOf, decimals } = pair;
+      const { balanceOf, decimals } = userPair;
       const { balanceOf: balanceOfToken0 } = pairToken0;
       const { balanceOf: balanceOfToken1 } = pairToken1;
 
@@ -109,6 +122,8 @@ const getPairs = async ({
         proportion,
         userBalance: balanceOf && formatUnits(balanceOf, decimals),
         decimals,
+        pairNames: pair.name,
+        pairSymbol: pair.symbol,
       };
     })
   );

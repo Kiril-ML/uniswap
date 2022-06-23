@@ -4,6 +4,7 @@ import { addLiquidity } from './addLiquidity';
 import { calculateAmountIn } from './calculateAmountIn';
 import { calculateAmountOut } from './calculateAmountOut';
 import { calculateMaxAmountOut } from './calculateMaxAmountOut';
+import { removeLiquidity } from './removeLiquidity';
 
 export {
   getData,
@@ -12,4 +13,5 @@ export {
   calculateAmountIn,
   calculateAmountOut,
   calculateMaxAmountOut,
+  removeLiquidity,
 };
