@@ -4,6 +4,7 @@ import { Dispatch, FC, SetStateAction, useState } from 'react';
 
 import { useAppSelector, useAppDispatch } from 'src/app/hooks';
 import { selectProvider } from 'src/features/Provider/redux/selectors';
+import { setShouldUpdateData } from 'src/features/Provider/redux/slice';
 import { removeLiquidity } from 'src/features/Provider/redux/thunks';
 import {
   Box,
@@ -23,9 +24,16 @@ type Props = {
   handleChangeForm: Dispatch<
     SetStateAction<'RemoveLiquidity' | 'AddLiquidity'>
   >;
+  handleShowAlertClick: () => void;
+  handleCloseAlertClick: () => void;
 };
 
-const RemoveLiquidityForm: FC<Props> = ({ isLoading, handleChangeForm }) => {
+const RemoveLiquidityForm: FC<Props> = ({
+  isLoading,
+  handleChangeForm,
+  handleShowAlertClick,
+  handleCloseAlertClick,
+}) => {
   const theme = useTheme();
   const styles = createStyles(theme);
 
@@ -45,6 +53,7 @@ const RemoveLiquidityForm: FC<Props> = ({ isLoading, handleChangeForm }) => {
 
   const onClickChangeForm = () => {
     handleChangeForm('AddLiquidity');
+    handleCloseAlertClick();
   };
 
   const handleClickButton: HandleClickButton = ({
@@ -61,8 +70,13 @@ const RemoveLiquidityForm: FC<Props> = ({ isLoading, handleChangeForm }) => {
           amountLP,
           signer,
         })
-      ).then(() => setActiveTransaction(false));
+      ).then(() => {
+        dispatch(setShouldUpdateData());
+        setActiveTransaction(false);
+        handleShowAlertClick();
+      });
 
+      handleCloseAlertClick();
       setActiveTransaction(true);
     }
   };

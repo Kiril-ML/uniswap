@@ -12,6 +12,7 @@ import {
 
 import { useAppDispatch, useAppSelector } from 'src/app/hooks';
 import { selectProvider } from 'src/features/Provider/redux/selectors';
+import { setShouldUpdateData } from 'src/features/Provider/redux/slice';
 import { addLiquidity } from 'src/features/Provider/redux/thunks';
 import { Token } from 'src/features/Provider/types';
 import { findCurrentPair, shortBalance } from 'src/features/Provider/utils';
@@ -37,9 +38,16 @@ type Props = {
     SetStateAction<'RemoveLiquidity' | 'AddLiquidity'>
   >;
   isLoading: boolean;
+  handleShowAlertClick: () => void;
+  handleCloseAlertClick: () => void;
 };
 
-const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
+const AddLiquidityForm: FC<Props> = ({
+  handleChangeForm,
+  isLoading,
+  handleShowAlertClick,
+  handleCloseAlertClick,
+}) => {
   const theme = useTheme();
   const styles = createStyles(theme);
 
@@ -68,8 +76,7 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
     signer = library.getSigner();
   }
 
-  const isShouldDisabled =
-    account === undefined || isLoading || activeTransaction;
+  const isShouldDisabled = account === undefined || isLoading;
 
   const shouldButtonDisabled =
     submitButtonText !== 'Добавить ликвидность' ||
@@ -106,6 +113,7 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
 
   const onClickChangeForm = () => {
     handleChangeForm('RemoveLiquidity');
+    handleCloseAlertClick();
   };
 
   const handleFirstTokenAutocompleteChange: HandleAutocompleteChange = (
@@ -234,13 +242,17 @@ const AddLiquidityForm: FC<Props> = ({ handleChangeForm, isLoading }) => {
           provider: library,
           signer,
         })
-      ).then(() => setActiveTransaction(false));
+      ).then(() => {
+        handleShowAlertClick();
+        dispatch(setShouldUpdateData());
+        setActiveTransaction(false);
+      });
 
       setFirstTokenValue('');
       setFirstToken(initialState.firstToken);
       setSecondToken(initialState.secondToken);
       setSecondTokenValue('');
-
+      handleCloseAlertClick();
       setActiveTransaction(true);
     }
   };

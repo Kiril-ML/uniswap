@@ -5,6 +5,7 @@ const initialState: State = {
   isCalculatingAmountIn: false,
   isCalculatingAmountOut: false,
   isCalculatingMaxAmountOutValue: false,
+  shouldUpdateData: true,
   error: null,
   data: {
     tokens: [],

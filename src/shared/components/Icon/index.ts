@@ -8,6 +8,7 @@ import { SadEmoticon } from './SadEmoticon/SadEmoticon';
 import { ArrowDown } from './ArrowDown/ArrowDown';
 import { Logout } from './Logout/Logout';
 import { WifiProtectedSetup } from './WifiProtectedSetup/WifiProtectedSetup';
+import { CloseIcon } from './CloseIcon/CloseIcon';
 
 export {
   Check,
@@ -20,4 +21,5 @@ export {
   SadEmoticon,
   ArrowDown,
   WifiProtectedSetup,
+  CloseIcon,
 };

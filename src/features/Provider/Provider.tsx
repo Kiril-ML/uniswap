@@ -1,5 +1,5 @@
 import { FC, useEffect } from 'react';
-import { useBlockNumber, useEthers } from '@usedapp/core';
+import { useEthers } from '@usedapp/core';
 
 import { useAppDispatch, useAppSelector } from 'src/app/hooks';
 import { LinearProgress, Typography } from 'src/shared/components';
@@ -13,19 +13,15 @@ type Props = {
 };
 
 const Provider: FC<Props> = ({ view }) => {
-  const { status, error } = useAppSelector(selectProvider);
+  const { status, error, shouldUpdateData } = useAppSelector(selectProvider);
   const dispatch = useAppDispatch();
 
   const { account, library } = useEthers();
-  const currentBlock = useBlockNumber();
-
-  // console.log(data, 'data');
-  // console.log(currentBlock, 'currentBlock');
 
   useEffect(() => {
     const isAuth = library !== undefined && account !== undefined;
 
-    if (isAuth) {
+    if (isAuth && shouldUpdateData) {
       dispatch(
         getData({
           userAddress: account,
@@ -33,7 +29,7 @@ const Provider: FC<Props> = ({ view }) => {
         })
       );
     }
-  }, [dispatch, library, account, currentBlock]);
+  }, [dispatch, library, account, shouldUpdateData]);
 
   switch (status) {
     case REQUEST_STATUS.idle:

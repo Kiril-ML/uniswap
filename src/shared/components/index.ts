@@ -12,6 +12,7 @@ import {
   ArrowDown,
   Logout,
   WifiProtectedSetup,
+  CloseIcon,
 } from './Icon';
 import { IconButton } from './IconButton/IconButton';
 import { LazyContainer } from './LazyContainer/LazyContainer';
@@ -31,6 +32,7 @@ import { Alert } from './Alert/Alert';
 import { SVGIcon } from './Icon/SVGIcon/SVGIcon';
 import { InputAdornment } from './TextField/InputAdornment/InputAdornment';
 import { Autocomplete } from './Autocomplete/Autocomplete';
+import { Collapse } from './Collapse/Collapse';
 
 export {
   Autocomplete,
@@ -65,4 +67,6 @@ export {
   InputAdornment,
   ArrowDown,
   Logout,
+  Collapse,
+  CloseIcon,
 };

@@ -89,6 +89,7 @@ const Header: FC<Props> = ({ handleError }) => {
 
   return (
     <HeaderComponent
+      css={styles.root()}
       navigation={navigation}
       userWallet={
         <>

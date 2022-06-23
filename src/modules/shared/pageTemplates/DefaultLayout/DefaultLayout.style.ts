@@ -23,7 +23,6 @@ const createStyles = (props: Pick<Props, 'header'>, theme: Theme) => ({
   header: () => {
     return css`
       grid-area: header;
-      margin-top: ${theme.spacing(90)};
     `;
   },
   content: () => {

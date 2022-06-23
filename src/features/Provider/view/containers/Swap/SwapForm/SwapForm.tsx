@@ -27,6 +27,7 @@ import {
   calculateAmountOut,
   calculateMaxAmountOut,
   selectProvider,
+  setShouldUpdateData,
   swapIn,
 } from '../../../../redux/slice';
 import {
@@ -45,9 +46,15 @@ type HandleAutocompleteChange =
 
 type Props = {
   isLoading: boolean;
+  handleShowAlertClick: () => void;
+  handleCloseAlertClick: () => void;
 };
 
-const SwapForm: FC<Props> = ({ isLoading }) => {
+const SwapForm: FC<Props> = ({
+  isLoading,
+  handleShowAlertClick,
+  handleCloseAlertClick,
+}) => {
   const theme = useTheme();
   const styles = createStyles(theme);
 
@@ -87,8 +94,7 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
     signer = library.getSigner();
   }
 
-  const isShouldDisabled =
-    account === undefined || isLoading || activeTransaction;
+  const isShouldDisabled = account === undefined || isLoading;
 
   const shouldButtonDisabled =
     submitButtonText !== 'Обменять' ||
@@ -196,13 +202,17 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
           provider: library,
           signer,
         })
-      ).then(() => setActiveTransaction(false));
+      ).then(() => {
+        handleShowAlertClick();
+        setActiveTransaction(false);
+        dispatch(setShouldUpdateData());
+      });
 
       setFirstTokenValue('');
       setFirstToken(initialState.firstToken);
       setSecondToken(initialState.secondToken);
       setSecondTokenValue('');
-
+      handleCloseAlertClick();
       setActiveTransaction(true);
     }
   };
@@ -355,7 +365,7 @@ const SwapForm: FC<Props> = ({ isLoading }) => {
         })
       );
     }
-  }, [calculatedMaxAmountOutValue.amountOut]);
+  }, [calculatedMaxAmountOutValue.amountOut, currentPair]);
 
   return (
     <Card
