@@ -13,7 +13,7 @@ type Props = {
 };
 
 const Provider: FC<Props> = ({ view }) => {
-  const { status, error, data } = useAppSelector(selectProvider);
+  const { status, error } = useAppSelector(selectProvider);
   const dispatch = useAppDispatch();
 
   const { account, library } = useEthers();

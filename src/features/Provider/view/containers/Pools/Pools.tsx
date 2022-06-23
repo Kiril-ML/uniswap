@@ -1,7 +1,5 @@
 import { FC, useState } from 'react';
-import { useTheme } from '@mui/material';
 
-import { createStyles } from './Pools.style';
 import { AddLiquidityForm } from './AddLiquidityForm/AddLiquidityForm';
 import { RemoveLiquidityForm } from './RemoveLiquidityForm/RemoveLiquidityForm';
 
@@ -10,9 +8,6 @@ type Props = {
 };
 
 const Pools: FC<Props> = ({ isLoading }) => {
-  const theme = useTheme();
-  const styles = createStyles(theme);
-
   const [formType, setFormType] = useState<'AddLiquidity' | 'RemoveLiquidity'>(
     'AddLiquidity'
   );
@@ -22,7 +17,7 @@ const Pools: FC<Props> = ({ isLoading }) => {
   ) : (
     <RemoveLiquidityForm
       handleChangeForm={setFormType}
-      pairs={[]}
+      isLoading={isLoading}
     ></RemoveLiquidityForm>
   );
 };
