@@ -14,6 +14,7 @@ type Options = {
   tokenInValue: ethers.BigNumber;
   tokenOutAddress: string;
   tokenOutValue: ethers.BigNumber;
+  isProportionNaN: boolean;
   provider: ethers.providers.JsonRpcProvider;
   signer: ethers.providers.JsonRpcSigner;
 };
@@ -25,6 +26,7 @@ const addLiquidity = createAsyncThunk(
     tokenInValue,
     tokenOutAddress,
     tokenOutValue,
+    isProportionNaN,
     provider,
     signer,
   }: Options): Promise<void> => {
@@ -43,7 +45,9 @@ const addLiquidity = createAsyncThunk(
 
     const hasPair = !/^0x0+$/.test(registry.getPair);
 
-    if (!hasPair) {
+    const shouldCreateNewPair = isProportionNaN || !hasPair;
+
+    if (shouldCreateNewPair) {
       registry = await createPair({
         tokenInAddress,
         tokenOutAddress,

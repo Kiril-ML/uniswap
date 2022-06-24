@@ -41,20 +41,13 @@ const getPairs = async ({
         return null;
       }
 
-      const userPair = await fetchReadFromERC20({
-        contractParameters: { address: pairAddress, provider },
-        methods: { balanceOf: [userAddress], decimals: [] },
-      });
-
-      if (isError(userPair)) {
-        return userPair;
-      }
-
       const pair = await fetchReadFromERC20Pair({
         contractParameters: { address: pairAddress, provider },
         methods: {
           name: [],
           symbol: [],
+          balanceOf: [userAddress],
+          decimals: [],
         },
       });
 
@@ -80,11 +73,16 @@ const getPairs = async ({
         return pairToken1;
       }
 
-      const { balanceOf, decimals } = userPair;
+      const { balanceOf, decimals } = pair;
       const { balanceOf: balanceOfToken0 } = pairToken0;
       const { balanceOf: balanceOfToken1 } = pairToken1;
 
       const isProportionUndefined =
+        balanceOfToken0 === undefined ||
+        balanceOfToken1 === undefined ||
+        (balanceOfToken0.isZero() && balanceOfToken1.isZero());
+
+      const isProportionNaN =
         balanceOfToken0 === undefined ||
         balanceOfToken1 === undefined ||
         balanceOfToken0.isZero() ||
@@ -98,6 +96,10 @@ const getPairs = async ({
         formattedBalanceOfToken0 = '0';
         formattedBalanceOfToken1 = '0';
         proportion = 'any';
+      } else if (isProportionNaN) {
+        formattedBalanceOfToken0 = '0';
+        formattedBalanceOfToken1 = '0';
+        proportion = 'NaN';
       } else {
         formattedBalanceOfToken0 = formatUnits(
           balanceOfToken0,

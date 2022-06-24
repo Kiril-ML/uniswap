@@ -16,12 +16,6 @@ const Swap: FC<Props> = ({ isLoading }) => {
   const styles = createStyles(theme);
   const [showAlert, setShowAlert] = useState(false);
 
-  if (showAlert === true) {
-    setTimeout(() => {
-      setShowAlert(false);
-    }, 10000);
-  }
-
   const handleCloseAlertClick = () => {
     setShowAlert(false);
   };

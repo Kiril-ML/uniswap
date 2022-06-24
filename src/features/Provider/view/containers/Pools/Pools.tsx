@@ -21,12 +21,6 @@ const Pools: FC<Props> = ({ isLoading }) => {
   );
   const [showAlert, setShowAlert] = useState(false);
 
-  if (showAlert === true) {
-    setTimeout(() => {
-      setShowAlert(false);
-    }, 10000);
-  }
-
   const handleCloseAlertClick = () => {
     setShowAlert(false);
   };

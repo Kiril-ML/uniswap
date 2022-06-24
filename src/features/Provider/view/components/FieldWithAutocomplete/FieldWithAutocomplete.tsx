@@ -70,6 +70,7 @@ const FieldWithAutocomplete: FC<Props> = ({
               css={styles.autocomplete()}
               options={options}
               value={optionsValue}
+              loading={options.length === 0}
               isOptionEqualToValue={(option, value) =>
                 option.decimals === value.decimals
               }

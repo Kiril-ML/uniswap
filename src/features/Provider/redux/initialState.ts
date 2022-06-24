@@ -12,17 +12,17 @@ const initialState: State = {
     fee: { value: '0', decimals: 0 },
   },
   calculatedAmountInValue: {
-    amountIn: '0',
-    tokenInFee: '0',
+    amountIn: '',
+    tokenInFee: '',
     decimals: 18,
   },
   calculatedAmountOutValue: {
-    amountOut: '0',
+    amountOut: '',
     tokenOutFee: '0',
     decimals: 18,
   },
   calculatedMaxAmountOutValue: {
-    amountOut: '0',
+    amountOut: '',
     decimals: 18,
   },
 };

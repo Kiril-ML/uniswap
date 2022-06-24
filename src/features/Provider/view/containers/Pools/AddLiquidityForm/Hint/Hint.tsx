@@ -59,8 +59,9 @@ const Hint: FC<Props> = ({
 
         break;
       }
-      case '': {
-        proportionHint = '';
+      case 'NaN': {
+        proportionHint = 'Невозможно рассчитать пропорцию';
+        pairHint = 'Будет создана новая пара';
 
         break;
       }
@@ -95,7 +96,12 @@ const Hint: FC<Props> = ({
         </Typography>
       )}
       {shouldCalculateProportion && (
-        <Typography css={styles.caption()}>{proportionHint}</Typography>
+        <>
+          <Typography css={styles.caption()}>{proportionHint}</Typography>
+          {pairHint && (
+            <Typography css={styles.caption()}>{pairHint}</Typography>
+          )}
+        </>
       )}
 
       {!isPairExist && (

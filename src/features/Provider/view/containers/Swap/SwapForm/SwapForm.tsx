@@ -26,6 +26,8 @@ import {
   calculateAmountIn,
   calculateAmountOut,
   calculateMaxAmountOut,
+  resetAmountInValue,
+  resetAmountOutValue,
   selectProvider,
   swapIn,
 } from '../../../../redux/slice';
@@ -153,10 +155,10 @@ const SwapForm: FC<Props> = ({
   ) => {
     const shouldReset =
       value === null || typeof value === 'string' || Array.isArray(value);
+    setFirstTokenValue('');
 
     if (shouldReset) {
       setFirstToken(initialState.firstToken);
-      setFirstTokenValue('');
 
       return;
     }
@@ -170,10 +172,10 @@ const SwapForm: FC<Props> = ({
   ) => {
     const shouldReset =
       value === null || typeof value === 'string' || Array.isArray(value);
+    setSecondTokenValue('');
 
     if (shouldReset) {
       setSecondToken(initialState.secondToken);
-      setSecondTokenValue('');
 
       return;
     }
@@ -250,8 +252,8 @@ const SwapForm: FC<Props> = ({
       );
     }
 
-    if (newValue === '0') {
-      setSecondTokenValue('');
+    if (newValue === '0' || newValue === '') {
+      dispatch(resetAmountOutValue());
     }
   };
 
@@ -291,7 +293,7 @@ const SwapForm: FC<Props> = ({
     }
 
     if (newValue === '' || newValue === '0') {
-      setFirstTokenValue('');
+      dispatch(resetAmountInValue());
     }
   };
 

@@ -16,7 +16,14 @@ import { selectProvider } from './selectors';
 const slice = createSlice({
   name: 'Provider',
   initialState,
-  reducers: {},
+  reducers: {
+    resetAmountInValue(state) {
+      state.calculatedAmountInValue.amountIn = '';
+    },
+    resetAmountOutValue(state) {
+      state.calculatedAmountOutValue.amountOut = '';
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getData.fulfilled, (state, action) => {
@@ -109,6 +116,8 @@ const slice = createSlice({
   },
 });
 
+const { resetAmountInValue, resetAmountOutValue } = slice.actions;
+
 const { reducer } = slice;
 
 export {
@@ -121,4 +130,6 @@ export {
   calculateAmountOut,
   calculateMaxAmountOut,
   removeLiquidity,
+  resetAmountInValue,
+  resetAmountOutValue,
 };

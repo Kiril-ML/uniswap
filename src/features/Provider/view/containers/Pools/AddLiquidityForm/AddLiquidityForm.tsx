@@ -231,13 +231,16 @@ const AddLiquidityForm: FC<Props> = ({
   const handleSubmit = (event: SyntheticEvent) => {
     event.preventDefault();
 
-    if (library !== undefined && signer !== null) {
+    const shouldDispatch = library !== undefined && currentPair !== null;
+
+    if (shouldDispatch && signer !== null) {
       dispatch(
         addLiquidity({
           tokenInAddress: firstToken.address,
           tokenInValue: parseUnits(firstTokenValue, firstToken.decimals),
           tokenOutAddress: secondToken.address,
           tokenOutValue: parseUnits(secondTokenValue, secondToken.decimals),
+          isProportionNaN: currentPair.proportion === 'NaN',
           provider: library,
           signer,
         })

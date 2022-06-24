@@ -27,24 +27,32 @@ const changeButtonText = ({
     return 'Подключите кошелек';
   }
 
-  if (firstToken.address === '' || secondToken.address === '') {
+  const isTokenChosen = firstToken.address !== '' && secondToken.address !== '';
+
+  if (!isTokenChosen) {
     return 'Выберите токены';
   }
 
-  if (
-    firstToken.address !== '' &&
-    secondToken.address !== '' &&
-    (firstTokenValue === '' || secondTokenValue === '')
-  ) {
+  const isTokenNullValue =
+    isTokenChosen &&
+    (firstTokenValue === '' ||
+      secondTokenValue === '' ||
+      +firstTokenValue === 0 ||
+      +secondTokenValue === 0);
+
+  if (isTokenNullValue) {
     return 'Укажите количество';
   }
 
-  if (
+  const isTokenFillValue =
     firstToken.address !== '' &&
     secondToken.address !== '' &&
     firstTokenValue !== '' &&
-    secondTokenValue !== ''
-  ) {
+    secondTokenValue !== '' &&
+    +firstTokenValue !== 0 &&
+    +secondTokenValue !== 0;
+
+  if (isTokenFillValue) {
     return 'Добавить ликвидность';
   }
 
