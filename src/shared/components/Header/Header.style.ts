@@ -28,9 +28,12 @@ const createStyles = (props: {}, theme: Theme) => ({
     grid-area: logo;
   `,
   userWallet: () => css`
-    line-height: ${theme.typography.pxToRem(26)};
-    font-weight: ${theme.typography.h5.fontWeight};
     grid-area: wallet;
+    @media (max-width: ${theme.breakpoints.values.sm}px) {
+      display: flex;
+      width: 100%;
+      justify-content: center;
+    }
   `,
   navigation: () => css`
     grid-area: navigation;

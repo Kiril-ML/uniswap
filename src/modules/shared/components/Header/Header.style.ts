@@ -9,6 +9,10 @@ const createStyles = (props: {}, theme: Theme) => ({
   auth: () =>
     css`
       padding: ${theme.spacing(10)};
+      @media (max-width: ${theme.breakpoints.values.sm}px) {
+        width: 100%;
+        max-width: ${theme.spacing(500)};
+      }
     `,
   walletInfo: () => css`
     display: flex;

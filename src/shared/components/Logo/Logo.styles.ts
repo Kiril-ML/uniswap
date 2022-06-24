@@ -8,6 +8,11 @@ const createStyles = (props: {}, theme: Theme) => ({
     stroke: ${theme.palette.text.primary};
     stroke-width: ${theme.spacing(0.7)};
     color: transparent;
+
+    @media (max-width: ${theme.breakpoints.values.sm}px) {
+      height: ${theme.spacing(45)};
+      width: ${theme.spacing(45)};
+    }
   `,
 });
 

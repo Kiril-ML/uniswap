@@ -28,8 +28,8 @@ const createStyles = (props: Pick<Props, 'header'>, theme: Theme) => ({
   content: () => {
     return css`
       grid-area: content;
-      padding-top: 1em;
-      padding-bottom: 1em;
+      padding-top: ${theme.spacing(10)};
+      padding-bottom: ${theme.spacing(10)};
     `;
   },
 });

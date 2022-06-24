@@ -53,7 +53,7 @@ const Header: FC<Props> = ({ handleError }) => {
 
   useEffect(() => {
     if (chainId !== Rinkeby.chainId) {
-      handleError('Пожалуйста, Выберите сеть rinkeby');
+      handleError('Пожалуйста, выберите сеть Rinkeby');
 
       return;
     }
@@ -104,7 +104,7 @@ const Header: FC<Props> = ({ handleError }) => {
                   Number(formatEther(etherBalance)).toFixed(3)
                 ) : (
                   <CircularProgress
-                    style={{ maxWidth: '20px', maxHeight: '20px' }}
+                    style={{ maxWidth: '12px', maxHeight: '12px' }}
                   />
                 )}
               </Typography>

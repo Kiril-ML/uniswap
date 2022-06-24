@@ -20,7 +20,7 @@ const createStyles = (props: {}, theme: Theme) => ({
         `;
 
     return css`
-      font-size: ${theme.typography.button.fontSize};
+      font-size: ${theme.typography.pxToRem(18)};
       font-weight: ${theme.typography.button.fontWeight};
       word-break: break-word;
       overflow: hidden;

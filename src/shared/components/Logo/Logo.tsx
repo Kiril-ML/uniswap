@@ -11,7 +11,14 @@ const Logo: FC<Props> = (props) => {
   const theme = useTheme();
   const styles = createStyles({}, theme);
 
-  return <SVGIcon css={styles.root()} component={SVG} {...props}></SVGIcon>;
+  return (
+    <SVGIcon
+      viewBox="0 0 14 15"
+      css={styles.root()}
+      component={SVG}
+      {...props}
+    ></SVGIcon>
+  );
 };
 
 export type { Props };

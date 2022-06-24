@@ -8,6 +8,11 @@ const createStyles = (theme: Theme) => ({
     border-radius: ${theme.spacing(24)};
     background: ${theme.palette.background.paper};
     box-shadow: ${theme.shadows[13]};
+
+    @media (max-width: ${theme.breakpoints.values.sm}px) {
+      max-width: none;
+      width: 100%;
+    }
   `,
   button: () => css`
     margin-top: ${theme.spacing(10)};

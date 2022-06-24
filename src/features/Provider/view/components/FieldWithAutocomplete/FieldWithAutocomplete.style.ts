@@ -11,7 +11,11 @@ const createStyles = (theme: Theme) => ({
     css`
       min-width: ${theme.spacing(110)};
     `,
-  input: () => css``,
+  input: () => css`
+    @media (max-width: ${theme.breakpoints.values.sm}px) {
+      margin-right: ${theme.spacing(150)};
+    }
+  `,
 
   option: () => css``,
   optionAvatar: () =>
@@ -25,7 +29,9 @@ const createStyles = (theme: Theme) => ({
   `,
   captionBalance: () =>
     css`
-      line-clamp: 1;
+      @media (max-width: ${theme.breakpoints.values.sm}px) {
+        font-size: ${theme.spacing(16)};
+      }
     `,
   addMaxBtn: () => css``,
   maxValueBox: () => css`
