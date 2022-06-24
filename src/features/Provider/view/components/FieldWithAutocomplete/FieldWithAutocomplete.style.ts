@@ -13,7 +13,7 @@ const createStyles = (theme: Theme) => ({
     `,
   input: () => css`
     @media (max-width: ${theme.breakpoints.values.sm}px) {
-      margin-right: ${theme.spacing(150)};
+      margin-right: ${theme.spacing(160)};
     }
   `,
 

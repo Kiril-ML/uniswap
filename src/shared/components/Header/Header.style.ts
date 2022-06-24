@@ -22,6 +22,7 @@ const createStyles = (props: {}, theme: Theme) => ({
         'navigation'
         'wallet';
       justify-items: center;
+      row-gap: ${theme.spacing(2)};
     }
   `,
   logo: () => css`

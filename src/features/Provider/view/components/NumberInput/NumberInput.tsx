@@ -1,3 +1,4 @@
+import { SerializedStyles } from '@emotion/react';
 import { FC } from 'react';
 import NumberFormat from 'react-number-format';
 
@@ -8,7 +9,7 @@ type Props = Pick<
   'disabled' | 'InputProps' | 'variant' | 'inputProps'
 > & {
   isCalculating?: boolean;
-  css?: any;
+  css?: SerializedStyles;
 };
 
 const NumberInput: FC<Props> = ({

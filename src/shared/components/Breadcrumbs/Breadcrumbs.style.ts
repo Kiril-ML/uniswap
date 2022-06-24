@@ -20,7 +20,7 @@ const createStyles = (props: {}, theme: Theme) => ({
         `;
 
     return css`
-      font-size: ${theme.typography.pxToRem(18)};
+      font-size: ${theme.typography.pxToRem(16)};
       font-weight: ${theme.typography.button.fontWeight};
       word-break: break-word;
       overflow: hidden;
@@ -31,6 +31,10 @@ const createStyles = (props: {}, theme: Theme) => ({
 
       &:hover {
         color: ${alpha(theme.palette.common.black, 1)};
+      }
+
+      @media (max-width: ${theme.breakpoints.values.sm}px) {
+        font-size: ${theme.typography.pxToRem(18)};
       }
     `;
   },

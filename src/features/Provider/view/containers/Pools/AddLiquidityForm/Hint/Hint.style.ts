@@ -10,10 +10,18 @@ const createStyles = (theme: Theme) => ({
   caption: () => css`
     font-size: ${theme.typography.pxToRem(12)};
     color: ${theme.palette.grey[600]};
+
+    @media (max-width: ${theme.breakpoints.values.sm}px) {
+      font-size: ${theme.typography.pxToRem(16)};
+    }
   `,
   insufficientAmount: () => css`
     font-size: ${theme.typography.pxToRem(16)};
     color: ${theme.palette.error.main};
+
+    @media (max-width: ${theme.breakpoints.values.sm}px) {
+      font-size: ${theme.typography.pxToRem(18)};
+    }
   `,
 });
 

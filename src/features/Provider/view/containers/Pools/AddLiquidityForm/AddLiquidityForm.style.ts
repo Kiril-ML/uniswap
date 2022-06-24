@@ -10,7 +10,6 @@ const createStyles = (theme: Theme) => ({
     box-shadow: ${theme.shadows[13]};
 
     @media (max-width: ${theme.breakpoints.values.sm}px) {
-      max-width: none;
       width: 100%;
     }
   `,
