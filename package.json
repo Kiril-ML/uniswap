@@ -42,8 +42,7 @@
     "storybook": "start-storybook -p 6006 -c configs/.storybook -s public",
     "storybook:build": "build-storybook -c configs/.storybook -s public",
     "post-update": "echo \"codesandbox preview only, need an update\" && yarn upgrade --latest",
-    "prepare": "husky install configs/husky",
-    "chromatic": "npx chromatic --project-token=40879ed687af"
+    "prepare": "husky install configs/husky"
   },
   "stylelint": {
     "extends": "./configs/stylelint/stylelint.config.js"
@@ -77,7 +76,6 @@
     "postcss-normalize": "^10.0.1",
     "react": "latest",
     "react-dom": "latest",
-    "react-hook-form": "^7.32.0",
     "react-number-format": "^4.9.3",
     "react-redux": "^7.2.6",
     "react-string-replace": "^0.4.4",
