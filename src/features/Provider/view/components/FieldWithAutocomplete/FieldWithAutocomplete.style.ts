@@ -20,9 +20,12 @@ const createStyles = (theme: Theme) => ({
   option: () => css``,
   optionAvatar: () =>
     css`
-      flex: 0 1 35%;
+      width: 35%;
     `,
-  optionText: () => css``,
+  optionText: () =>
+    css`
+      width: 65%;
+    `,
   caption: () => css`
     display: flex;
     flex-direction: column;

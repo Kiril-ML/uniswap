@@ -52,6 +52,8 @@ const FieldWithAutocomplete: FC<Props> = ({
   const theme = useTheme();
   const styles = createStyles(theme);
 
+  const value = optionsValue.address === '' ? null : optionsValue;
+
   return (
     <NumberInput
       css={styles.root()}
@@ -69,10 +71,11 @@ const FieldWithAutocomplete: FC<Props> = ({
             <Autocomplete
               css={styles.autocomplete()}
               options={options}
-              value={optionsValue}
+              clearOnBlur
+              value={value}
               loading={options.length === 0}
-              isOptionEqualToValue={(option, value) =>
-                option.decimals === value.decimals
+              isOptionEqualToValue={(option, val) =>
+                option.decimals === val.decimals
               }
               getOptionLabel={(option) => {
                 if (typeof option !== 'string') return option.symbol;
