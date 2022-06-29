@@ -43,19 +43,15 @@ import { Hint } from './Hint/Hint';
 import { changeButtonText } from './utils';
 
 type HandleAutocompleteChange =
-  FieldWithAutocompleteProps['handleAutocompleteChange'];
+  FieldWithAutocompleteProps['onAutocompleteChange'];
 
 type Props = {
   isLoading: boolean;
-  handleShowAlertClick: () => void;
-  handleCloseAlertClick: () => void;
+  onShowAlert: () => void;
+  onCloseAlert: () => void;
 };
 
-const SwapForm: FC<Props> = ({
-  isLoading,
-  handleShowAlertClick,
-  handleCloseAlertClick,
-}) => {
+const SwapForm: FC<Props> = ({ isLoading, onShowAlert, onCloseAlert }) => {
   const theme = useTheme();
   const styles = createStyles(theme);
 
@@ -204,7 +200,7 @@ const SwapForm: FC<Props> = ({
           signer,
         })
       ).then(() => {
-        handleShowAlertClick();
+        onShowAlert();
         setActiveTransaction(false);
       });
 
@@ -212,7 +208,7 @@ const SwapForm: FC<Props> = ({
       setFirstToken(initialState.firstToken);
       setSecondToken(initialState.secondToken);
       setSecondTokenValue('');
-      handleCloseAlertClick();
+      onCloseAlert();
       setActiveTransaction(true);
     }
   };
@@ -399,7 +395,7 @@ const SwapForm: FC<Props> = ({
                 }}
                 balance={shortBalance(firstToken.userBalance)}
                 disabled={isShouldDisabled}
-                handleAutocompleteChange={handleFirstTokenAutocompleteChange}
+                onAutocompleteChange={handleFirstTokenAutocompleteChange}
                 options={tokens.filter(
                   (token) => token.name !== secondToken.name
                 )}
@@ -428,7 +424,7 @@ const SwapForm: FC<Props> = ({
                 options={tokens.filter(
                   (token) => token.name !== firstToken.name
                 )}
-                handleAutocompleteChange={handleSecondTokenAutocompleteChange}
+                onAutocompleteChange={handleSecondTokenAutocompleteChange}
                 disabled={isShouldDisabled}
                 max={shortBalance(maxTokenOut)}
                 isCalculatingMaxAmountOutValue={isCalculatingMaxAmountOutValue}
@@ -448,7 +444,7 @@ const SwapForm: FC<Props> = ({
               secondTokenValue={secondTokenValue}
               slippage={+slippage}
               maxTokenIn={maxTokenIn}
-              handelButtonDisabled={handelButtonDisabled}
+              onDisabled={handelButtonDisabled}
             ></Hint>
             <Box>
               <Typography>Допустимое проскальзывание ?</Typography>

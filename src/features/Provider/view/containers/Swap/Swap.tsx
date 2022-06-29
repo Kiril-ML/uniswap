@@ -29,13 +29,13 @@ const Swap: FC<Props> = ({ isLoading }) => {
       <AlertMessage
         message="обмен прошел успешно"
         show={showAlert}
-        handleCloseClick={handleCloseAlertClick}
+        oneClose={handleCloseAlertClick}
       ></AlertMessage>
 
       <SwapForm
         isLoading={isLoading}
-        handleShowAlertClick={handleShowAlertClick}
-        handleCloseAlertClick={handleCloseAlertClick}
+        onShowAlert={handleShowAlertClick}
+        onCloseAlert={handleCloseAlertClick}
       />
     </Box>
   );

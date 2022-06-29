@@ -30,22 +30,20 @@ import { calculateMaxValue, calculateProportion } from './utils';
 import { changeButtonText } from './utils/changeButtonText';
 
 type HandleAutocompleteChange =
-  FieldWithAutocompleteProps['handleAutocompleteChange'];
+  FieldWithAutocompleteProps['onAutocompleteChange'];
 
 type Props = {
-  handleChangeForm: Dispatch<
-    SetStateAction<'RemoveLiquidity' | 'AddLiquidity'>
-  >;
+  onChangeForm: Dispatch<SetStateAction<'RemoveLiquidity' | 'AddLiquidity'>>;
   isLoading: boolean;
-  handleShowAlertClick: () => void;
-  handleCloseAlertClick: () => void;
+  onShowAlert: () => void;
+  onCloseAlert: () => void;
 };
 
 const AddLiquidityForm: FC<Props> = ({
-  handleChangeForm,
+  onChangeForm,
   isLoading,
-  handleShowAlertClick,
-  handleCloseAlertClick,
+  onShowAlert,
+  onCloseAlert,
 }) => {
   const theme = useTheme();
   const styles = createStyles(theme);
@@ -110,9 +108,9 @@ const AddLiquidityForm: FC<Props> = ({
     secondTokenName: secondToken.name,
   });
 
-  const onClickChangeForm = () => {
-    handleChangeForm('RemoveLiquidity');
-    handleCloseAlertClick();
+  const handleChangeForm = () => {
+    onChangeForm('RemoveLiquidity');
+    onCloseAlert();
   };
 
   const handleFirstTokenAutocompleteChange: HandleAutocompleteChange = (
@@ -245,7 +243,7 @@ const AddLiquidityForm: FC<Props> = ({
           signer,
         })
       ).then(() => {
-        handleShowAlertClick();
+        onShowAlert();
         setActiveTransaction(false);
       });
 
@@ -253,7 +251,7 @@ const AddLiquidityForm: FC<Props> = ({
       setFirstToken(initialState.firstToken);
       setSecondToken(initialState.secondToken);
       setSecondTokenValue('');
-      handleCloseAlertClick();
+      onCloseAlert();
       setActiveTransaction(true);
     }
   };
@@ -298,7 +296,7 @@ const AddLiquidityForm: FC<Props> = ({
                 size="small"
                 endIcon={<WifiProtectedSetup />}
                 disabled={isShouldDisabled}
-                onClick={onClickChangeForm}
+                onClick={handleChangeForm}
               >
                 МОИ ПАРЫ
               </Button>
@@ -311,7 +309,7 @@ const AddLiquidityForm: FC<Props> = ({
               }}
               balance={shortBalance(firstToken.userBalance)}
               disabled={isShouldDisabled}
-              handleAutocompleteChange={handleFirstTokenAutocompleteChange}
+              onAutocompleteChange={handleFirstTokenAutocompleteChange}
               options={tokens.filter(
                 (token) => token.name !== secondToken.name
               )}
@@ -329,7 +327,7 @@ const AddLiquidityForm: FC<Props> = ({
               }}
               balance={shortBalance(secondToken.userBalance)}
               options={tokens.filter((token) => token.name !== firstToken.name)}
-              handleAutocompleteChange={handleSecondTokenAutocompleteChange}
+              onAutocompleteChange={handleSecondTokenAutocompleteChange}
               disabled={isShouldDisabled}
               max={shortBalance(maxSecondToken)}
               optionsValue={secondToken}
@@ -345,7 +343,7 @@ const AddLiquidityForm: FC<Props> = ({
               shouldReverse={shouldReverse}
               maxTokenIn={maxFirstToken}
               maxTokenOut={maxSecondToken}
-              handelButtonDisabled={handelButtonDisabled}
+              onDisabled={handelButtonDisabled}
             ></Hint>
             <Button
               type="submit"

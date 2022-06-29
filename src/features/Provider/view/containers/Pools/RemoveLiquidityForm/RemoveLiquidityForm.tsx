@@ -17,21 +17,19 @@ import { BigNumber } from 'src/shared/helpers/blockchain/numbers';
 import { PairForm, Props as PairFormProps } from './PairForm/PairForm';
 import { createStyles } from './RemoveLiquidityForm.style';
 
-type HandleClickButton = PairFormProps['handleClickButton'];
+type HandleClickButton = PairFormProps['onClick'];
 type Props = {
   isLoading: boolean;
-  handleChangeForm: Dispatch<
-    SetStateAction<'RemoveLiquidity' | 'AddLiquidity'>
-  >;
-  handleShowAlertClick: () => void;
-  handleCloseAlertClick: () => void;
+  onChangeForm: Dispatch<SetStateAction<'RemoveLiquidity' | 'AddLiquidity'>>;
+  onShowAlert: () => void;
+  onCloseAlert: () => void;
 };
 
 const RemoveLiquidityForm: FC<Props> = ({
   isLoading,
-  handleChangeForm,
-  handleShowAlertClick,
-  handleCloseAlertClick,
+  onChangeForm,
+  onShowAlert,
+  onCloseAlert,
 }) => {
   const theme = useTheme();
   const styles = createStyles(theme);
@@ -50,9 +48,9 @@ const RemoveLiquidityForm: FC<Props> = ({
   const isShouldDisabled =
     account === undefined || isLoading || activeTransaction;
 
-  const onClickChangeForm = () => {
-    handleChangeForm('AddLiquidity');
-    handleCloseAlertClick();
+  const handleChangeForm = () => {
+    onChangeForm('AddLiquidity');
+    onCloseAlert();
   };
 
   const handleClickButton: HandleClickButton = ({
@@ -71,10 +69,10 @@ const RemoveLiquidityForm: FC<Props> = ({
         })
       ).then(() => {
         setActiveTransaction(false);
-        handleShowAlertClick();
+        onShowAlert();
       });
 
-      handleCloseAlertClick();
+      onCloseAlert();
       setActiveTransaction(true);
     }
   };
@@ -92,7 +90,7 @@ const RemoveLiquidityForm: FC<Props> = ({
                 size="small"
                 endIcon={<WifiProtectedSetup />}
                 disabled={isShouldDisabled}
-                onClick={onClickChangeForm}
+                onClick={handleChangeForm}
               >
                 ДОБАВИТЬ ПАРУ
               </Button>
@@ -105,8 +103,8 @@ const RemoveLiquidityForm: FC<Props> = ({
                   <PairForm
                     key={pair.address}
                     pair={pair}
-                    isShouldDisabled={isShouldDisabled}
-                    handleClickButton={handleClickButton}
+                    shouldDisabled={isShouldDisabled}
+                    onClick={handleClickButton}
                   ></PairForm>
                 ))
               )}

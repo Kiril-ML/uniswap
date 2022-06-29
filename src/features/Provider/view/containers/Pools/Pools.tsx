@@ -34,13 +34,13 @@ const Pools: FC<Props> = ({ isLoading }) => {
       <AlertMessage
         message="ликвидность добавлена успешно"
         show={showAlert}
-        handleCloseClick={handleCloseAlertClick}
+        oneClose={handleCloseAlertClick}
       ></AlertMessage>
       <AddLiquidityForm
-        handleShowAlertClick={handleShowAlertClick}
+        onShowAlert={handleShowAlertClick}
         isLoading={isLoading}
-        handleCloseAlertClick={handleCloseAlertClick}
-        handleChangeForm={setFormType}
+        onCloseAlert={handleCloseAlertClick}
+        onChangeForm={setFormType}
       />
     </Box>
   ) : (
@@ -48,13 +48,13 @@ const Pools: FC<Props> = ({ isLoading }) => {
       <AlertMessage
         message="ликвидность выведена успешно"
         show={showAlert}
-        handleCloseClick={handleCloseAlertClick}
+        oneClose={handleCloseAlertClick}
       ></AlertMessage>
       <RemoveLiquidityForm
-        handleChangeForm={setFormType}
+        onChangeForm={setFormType}
         isLoading={isLoading}
-        handleCloseAlertClick={handleCloseAlertClick}
-        handleShowAlertClick={handleShowAlertClick}
+        onCloseAlert={handleCloseAlertClick}
+        onShowAlert={handleShowAlertClick}
       ></RemoveLiquidityForm>
     </Box>
   );

@@ -28,7 +28,7 @@ type Props = NumberInputProps & {
   disabled?: boolean;
   isCalculating?: boolean;
   isCalculatingMaxAmountOutValue?: boolean;
-  handleAutocompleteChange: (
+  onAutocompleteChange: (
     event: SyntheticEvent<Element, Event>,
     value: Token | null | string | (string | Token)[],
     reason: 'createOption' | 'selectOption' | 'removeOption' | 'blur' | 'clear'
@@ -46,7 +46,7 @@ const FieldWithAutocomplete: FC<Props> = ({
   isCalculating = false,
   isCalculatingMaxAmountOutValue = false,
   handleMaxClick,
-  handleAutocompleteChange,
+  onAutocompleteChange,
   ...maskedDecimalFieldProps
 }) => {
   const theme = useTheme();
@@ -112,7 +112,7 @@ const FieldWithAutocomplete: FC<Props> = ({
               )}
               fullWidth
               disabled={disabled}
-              onChange={handleAutocompleteChange}
+              onChange={onAutocompleteChange}
             />
             <Box css={styles.caption()}>
               <Typography

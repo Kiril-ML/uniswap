@@ -13,8 +13,8 @@ import { createStyles } from './PairForm.style';
 
 type Props = {
   pair: Pair;
-  isShouldDisabled: boolean;
-  handleClickButton: ({
+  shouldDisabled: boolean;
+  onClick: ({
     token0Address,
     token1Address,
     amountLP,
@@ -25,14 +25,14 @@ type Props = {
   }) => void;
 };
 
-const PairForm: FC<Props> = ({ isShouldDisabled, pair, handleClickButton }) => {
+const PairForm: FC<Props> = ({ shouldDisabled, pair, onClick }) => {
   const theme = useTheme();
   const styles = createStyles(theme);
 
   const [value, setValue] = useState('');
 
-  const onClick = () => {
-    handleClickButton({
+  const handleClickButton = () => {
+    onClick({
       token0Address: pair.tokens[0].address,
       token1Address: pair.tokens[1].address,
       amountLP: parseUnits(value, pair.decimals),
@@ -74,7 +74,7 @@ const PairForm: FC<Props> = ({ isShouldDisabled, pair, handleClickButton }) => {
           type="button"
           size="small"
           color="secondary"
-          disabled={isShouldDisabled}
+          disabled={shouldDisabled}
           onClick={handleMaxClick}
         >
           макс
@@ -87,7 +87,7 @@ const PairForm: FC<Props> = ({ isShouldDisabled, pair, handleClickButton }) => {
           value,
           onChange: handleValueChange,
           disableUnderline: true,
-          disabled: isShouldDisabled,
+          disabled: shouldDisabled,
         }}
       ></NumberInput>
 
@@ -96,8 +96,8 @@ const PairForm: FC<Props> = ({ isShouldDisabled, pair, handleClickButton }) => {
         css={styles.button()}
         variant="contained"
         fullWidth
-        disabled={isShouldDisabled}
-        onClick={onClick}
+        disabled={shouldDisabled}
+        onClick={handleClickButton}
       >
         ВЫВЕСТИ
       </Button>

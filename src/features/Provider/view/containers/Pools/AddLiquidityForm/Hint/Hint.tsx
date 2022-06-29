@@ -16,7 +16,7 @@ type Props = {
   shouldReverse: boolean;
   maxTokenIn: string;
   maxTokenOut: string;
-  handelButtonDisabled: (shouldDisabledButton: boolean) => void;
+  onDisabled: (shouldDisabledButton: boolean) => void;
 };
 
 const Hint: FC<Props> = ({
@@ -28,7 +28,7 @@ const Hint: FC<Props> = ({
   shouldReverse,
   maxTokenIn,
   maxTokenOut,
-  handelButtonDisabled,
+  onDisabled,
 }) => {
   const theme = useTheme();
   const styles = createStyles(theme);
@@ -42,7 +42,7 @@ const Hint: FC<Props> = ({
     (+maxTokenIn < +firstTokenValue || +maxTokenOut < +secondTokenValue);
 
   const isPairExist = !(isTokensChosen && pair === null);
-  handelButtonDisabled(isValueBiggerMax);
+  onDisabled(isValueBiggerMax);
 
   const isInsufficientUserBalance =
     isTokensChosen &&

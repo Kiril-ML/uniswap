@@ -18,7 +18,7 @@ type Props = {
   secondTokenValue: string;
   slippage: number;
   maxTokenIn: string;
-  handelButtonDisabled: (shouldDisabledButton: boolean) => void;
+  onDisabled: (shouldDisabledButton: boolean) => void;
 };
 
 const Hint: FC<Props> = ({
@@ -29,7 +29,7 @@ const Hint: FC<Props> = ({
   secondTokenValue,
   slippage,
   maxTokenIn,
-  handelButtonDisabled,
+  onDisabled,
 }) => {
   const theme = useTheme();
   const styles = createStyles(theme);
@@ -64,7 +64,7 @@ const Hint: FC<Props> = ({
     (+maxTokenIn < +firstTokenValue ||
       +calculatedMaxAmountOutValue.amountOut < +secondTokenValue);
 
-  handelButtonDisabled(isValueBiggerMax);
+  onDisabled(isValueBiggerMax);
 
   const isInsufficientLiquidity = pair?.proportion === 'any';
   const isPairExist = !(isTokensChosen && pair === null);
