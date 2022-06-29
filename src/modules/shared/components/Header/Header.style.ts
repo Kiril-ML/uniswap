@@ -14,16 +14,20 @@ const createStyles = (props: {}, theme: Theme) => ({
         max-width: ${theme.spacing(500)};
       }
     `,
+  walletBox: () => css`
+    display: flex;
+    flex-direction: column;
+  `,
   accountBox: () => css`
     display: flex;
     align-items: center;
     column-gap: ${theme.spacing(10)};
   `,
   balanceBox: () => css``,
-  walletBox: () => css`
-    min-height: ${theme.spacing(80)};
+  wallet: () => css`
+    min-height: ${theme.spacing(70)};
     display: flex;
-    flex-direction: column;
+    align-items: center;
   `,
 });
 

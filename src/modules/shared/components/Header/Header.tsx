@@ -97,9 +97,9 @@ const Header: FC<Props> = ({ handleError }) => {
       css={styles.root()}
       navigation={navigation}
       userWallet={
-        <Box css={styles.walletBox()}>
+        <Box css={styles.wallet()}>
           {account ? (
-            <>
+            <Box css={styles.walletBox()}>
               <Box css={styles.accountBox()}>
                 <Typography>Адрес: {shortenAddress(account)}</Typography>
                 <IconButton onClick={handleLogoutClick}>
@@ -118,7 +118,7 @@ const Header: FC<Props> = ({ handleError }) => {
                   )}
                 </Typography>
               </Box>
-            </>
+            </Box>
           ) : (
             <Button
               css={styles.auth()}
