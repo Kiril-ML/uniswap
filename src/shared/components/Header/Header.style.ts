@@ -11,7 +11,7 @@ const createStyles = (props: {}, theme: Theme) => ({
   `,
   toolbar: () => css`
     display: grid;
-    grid-template-columns: ${theme.spacing(230)} 1fr ${theme.spacing(230)};
+    grid-template-columns: ${theme.spacing(240)} 1fr ${theme.spacing(240)};
     grid-template-areas: 'logo navigation wallet';
 
     @media (max-width: ${theme.breakpoints.values.sm}px) {

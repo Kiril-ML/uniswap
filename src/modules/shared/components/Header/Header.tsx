@@ -1,7 +1,12 @@
 import { FC, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { CircularProgress, useTheme } from '@mui/material';
-import { useEthers, useEtherBalance, Rinkeby } from '@usedapp/core';
+import {
+  useEthers,
+  useEtherBalance,
+  Rinkeby,
+  shortenAddress,
+} from '@usedapp/core';
 import { formatEther } from '@ethersproject/units';
 
 import {
@@ -92,26 +97,28 @@ const Header: FC<Props> = ({ handleError }) => {
       css={styles.root()}
       navigation={navigation}
       userWallet={
-        <>
+        <Box css={styles.walletBox()}>
           {account ? (
-            <Box css={styles.walletInfo()}>
-              <Typography>
-                {`${account.slice(0, 5)}..${account.slice(-3)}`}
-              </Typography>
-              <Typography>
-                ETH:{' '}
-                {etherBalance ? (
-                  Number(formatEther(etherBalance)).toFixed(3)
-                ) : (
-                  <CircularProgress
-                    style={{ maxWidth: '12px', maxHeight: '12px' }}
-                  />
-                )}
-              </Typography>
-              <IconButton onClick={handleLogoutClick}>
-                <Logout></Logout>
-              </IconButton>
-            </Box>
+            <>
+              <Box css={styles.accountBox()}>
+                <Typography>Адрес: {shortenAddress(account)}</Typography>
+                <IconButton onClick={handleLogoutClick}>
+                  <Logout></Logout>
+                </IconButton>
+              </Box>
+              <Box css={styles.balanceBox()}>
+                <Typography>
+                  Баланс ETH:{' '}
+                  {etherBalance ? (
+                    Number(formatEther(etherBalance)).toFixed(3)
+                  ) : (
+                    <CircularProgress
+                      style={{ maxWidth: '12px', maxHeight: '12px' }}
+                    />
+                  )}
+                </Typography>
+              </Box>
+            </>
           ) : (
             <Button
               css={styles.auth()}
@@ -124,7 +131,7 @@ const Header: FC<Props> = ({ handleError }) => {
               Подключить кошелек
             </Button>
           )}
-        </>
+        </Box>
       }
     />
   );
