@@ -28,20 +28,18 @@ const Avatar: FC<Props> = ({
 
   return (
     <>
-      {!hasImage && (
+      {hasImage ? (
+        <Box css={styles.root()}>
+          <Box css={styles.inner()}>
+            <MUIAvatar css={styles.avatar()} src={src} {...MUIProps} />
+          </Box>
+        </Box>
+      ) : (
         <Box css={styles.root()}>
           <Box css={styles.inner()}>
             <MUIAvatar css={styles.avatar()} {...MUIProps}>
               {userNameToAvatar(userName)}
             </MUIAvatar>
-          </Box>
-        </Box>
-      )}
-
-      {hasImage && (
-        <Box css={styles.root()}>
-          <Box css={styles.inner()}>
-            <MUIAvatar css={styles.avatar()} src={src} {...MUIProps} />
           </Box>
         </Box>
       )}
