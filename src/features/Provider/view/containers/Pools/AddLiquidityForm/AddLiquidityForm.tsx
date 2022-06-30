@@ -316,7 +316,7 @@ const AddLiquidityForm: FC<Props> = ({
               isMaxBtnDisplayed
               max={shortBalance(maxFirstToken)}
               optionsValue={firstToken}
-              handleMaxClick={handleMaxClick}
+              onMaxClick={handleMaxClick}
             />
             <Box css={styles.arrow()}>+</Box>
             <FieldWithAutocomplete
@@ -332,7 +332,7 @@ const AddLiquidityForm: FC<Props> = ({
               max={shortBalance(maxSecondToken)}
               optionsValue={secondToken}
               isMaxBtnDisplayed
-              handleMaxClick={handleMaxClick}
+              onMaxClick={handleMaxClick}
             />
             <Hint
               pair={currentPair}

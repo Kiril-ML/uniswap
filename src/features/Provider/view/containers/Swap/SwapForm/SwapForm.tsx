@@ -401,7 +401,7 @@ const SwapForm: FC<Props> = ({ isLoading, onShowAlert, onCloseAlert }) => {
                 )}
                 isMaxBtnDisplayed
                 max={shortBalance(maxTokenIn)}
-                handleMaxClick={handleMaxClick}
+                onMaxClick={handleMaxClick}
                 optionsValue={firstToken}
                 isCalculating={isCalculatingAmountIn}
                 css={styles.input()}

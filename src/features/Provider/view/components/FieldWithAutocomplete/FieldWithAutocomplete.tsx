@@ -33,7 +33,7 @@ type Props = NumberInputProps & {
     value: Token | null | string | (string | Token)[],
     reason: 'createOption' | 'selectOption' | 'removeOption' | 'blur' | 'clear'
   ) => void;
-  handleMaxClick?: () => void;
+  onMaxClick?: () => void;
 };
 
 const FieldWithAutocomplete: FC<Props> = ({
@@ -45,7 +45,7 @@ const FieldWithAutocomplete: FC<Props> = ({
   disabled = false,
   isCalculating = false,
   isCalculatingMaxAmountOutValue = false,
-  handleMaxClick,
+  onMaxClick,
   onAutocompleteChange,
   ...maskedDecimalFieldProps
 }) => {
@@ -154,7 +154,7 @@ const FieldWithAutocomplete: FC<Props> = ({
                   color="secondary"
                   disabled={disabled}
                   fullWidth
-                  onClick={handleMaxClick}
+                  onClick={onMaxClick}
                 >
                   макс
                 </Button>
