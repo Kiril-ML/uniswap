@@ -8,10 +8,10 @@ import { createStyles } from './AlertMessage.style';
 type Props = {
   message: string;
   show: boolean;
-  oneClose: () => void;
+  onClose: () => void;
 };
 
-const AlertMessage: FC<Props> = ({ message = 'test', show, oneClose }) => {
+const AlertMessage: FC<Props> = ({ message = 'test', show, onClose }) => {
   const theme = useTheme();
   const styles = createStyles(theme);
 
@@ -24,7 +24,7 @@ const AlertMessage: FC<Props> = ({ message = 'test', show, oneClose }) => {
             aria-label="close"
             color="inherit"
             size="small"
-            onClick={oneClose}
+            onClick={onClose}
           >
             <CloseIcon fontSize="inherit" />
           </IconButton>
