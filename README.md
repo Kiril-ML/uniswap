@@ -14,10 +14,4 @@ Functional:
 
 [demo](https://uniswap-pearl-phi.vercel.app/)
 
-### Installation
 
-```bash
-git clone https://github.com/Kiril-ML/uniswap.git
-cd uniswap
-npm i
-```
