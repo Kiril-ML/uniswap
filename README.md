@@ -6,10 +6,9 @@ Clone of [uniswap](https://app.uniswap.org/) for education purpose.
 
 Functional:
 
-- swap pairs;
-- add of the pair's liquidity;
-- withdrawal of liquidity;
-- registration of a token pair that does not exist yet;
+- Filters radio stations by genre/country/input;
+- add selected radio stations to my best;
+- click on radio station, radio wave plays;
 
 ## Demo
 
